@@ -1,0 +1,49 @@
+# Gradle
+.gradle/
+build/
+**/build/
+!gradle-wrapper.jar
+
+# Android Studio
+.idea/
+*.iml
+*.ipr
+*.iws
+.DS_Store
+
+# Generated files
+local.properties
+captures/
+outputs/
+navigation.json
+
+# Log files
+*.log
+
+# Kotlin specific
+*.class
+*.kt~
+*.kts~
+
+# Signing keys
+*.jks
+*.keystore
+
+# OS files
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Crashlytics / Firebase
+crashlytics-build.properties
+fabric.properties
+google-services.json
+
+# Jetpack Compose previews
+.compose-cache/
+
+# Gradle caches
+.gradle/
+build/
+.gradle/caches/
+.gradle/buildOutputCleanup/
