@@ -5,6 +5,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import com.example.safeairapp.ui.screens.LoginScreen
+import com.example.safeairapp.ui.screens.RegisterScreen
 import com.example.safeairapp.ui.theme.SafeAirAppTheme
 
 class MainActivity : ComponentActivity() {
@@ -13,7 +14,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             SafeAirAppTheme {
-                LoginScreen()
+                RegisterScreen()
             }
         }
     }
