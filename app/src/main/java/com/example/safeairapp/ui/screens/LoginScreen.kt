@@ -9,9 +9,11 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -99,6 +101,14 @@ fun LoginScreen(modifier: Modifier = Modifier){
                         "Email...",
                         fontFamily = monsteratt,
                         fontSize = 18.sp
+                    )
+                },
+                trailingIcon = {
+                    Icon(
+                        painter = painterResource(R.drawable.mail),
+                        contentDescription = "Email Icon",
+                        tint = Color.Black,
+                        modifier = Modifier.size(22.dp)
                     )
                 },
                 modifier = Modifier
