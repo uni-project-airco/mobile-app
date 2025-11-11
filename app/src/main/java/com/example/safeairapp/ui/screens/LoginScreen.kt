@@ -3,6 +3,7 @@ package com.example.safeairapp.ui.screens
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -42,7 +43,7 @@ import com.example.safeairapp.R
 
 
 @Composable
-fun LoginScreen(modifier: Modifier = Modifier){
+fun LoginScreen(modifier: Modifier = Modifier, onSignUpClick: () -> Unit = {}){
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
 
@@ -198,7 +199,9 @@ fun LoginScreen(modifier: Modifier = Modifier){
                 text = "Don’t have an account? Sign up",
                 fontFamily = monsteratt,
                 fontWeight = FontWeight.Normal,
-                fontSize = 16.sp
+                fontSize = 16.sp,
+                modifier = Modifier
+                    .clickable { onSignUpClick() }
             )
         }
 
