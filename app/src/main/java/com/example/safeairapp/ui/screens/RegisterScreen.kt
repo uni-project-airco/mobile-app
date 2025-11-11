@@ -12,6 +12,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -28,6 +30,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -41,6 +46,15 @@ fun RegisterScreen(modifier: Modifier= Modifier){
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
+
+    val montserrat = FontFamily(
+        Font(R.font.montserrat_light, FontWeight.Light),
+        Font(R.font.montserrat, FontWeight.Normal),
+        Font(R.font.montserrat_medium, FontWeight.Medium),
+        Font(R.font.montserrat_semibold, FontWeight.SemiBold),
+        Font(R.font.montserrat_bold, FontWeight.Bold),
+        Font(R.font.montserrat_thin, FontWeight.Thin)
+    )
 
     val gradient = Brush.verticalGradient(
         colors = listOf(
@@ -66,6 +80,8 @@ fun RegisterScreen(modifier: Modifier= Modifier){
                 .padding(horizontal = 60.dp, vertical = 40.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            Spacer(modifier = Modifier.height(12.dp))
+
             Image(
                 painter = painterResource(R.drawable.safeair_logo_text_b),
                 contentDescription = "SafeAir logo",
@@ -73,12 +89,12 @@ fun RegisterScreen(modifier: Modifier= Modifier){
                     .height(90.dp)
             )
 
-            Spacer(modifier = Modifier.height(50.dp))
+            Spacer(modifier = Modifier.height(46.dp))
 
             Text(
                 text = "Create Account!",
-//                fontFamily = montserrat,
-//                fontWeight = FontWeight.Medium,
+                fontFamily = montserrat,
+                fontWeight = FontWeight.Medium,
                 fontSize = 34.sp,
                 modifier = Modifier.fillMaxWidth(),
                 textAlign = TextAlign.Center
@@ -92,7 +108,7 @@ fun RegisterScreen(modifier: Modifier= Modifier){
                 placeholder = {
                     Text(
                         "Full Name...",
-//                        fontFamily = montserrat,
+                        fontFamily = montserrat,
                         fontSize = 18.sp
                     )
                 },
@@ -118,12 +134,12 @@ fun RegisterScreen(modifier: Modifier= Modifier){
                 ),
                 shape = RoundedCornerShape(15.dp),
                 textStyle = TextStyle(
-//                    fontFamily = montserrat,
+                    fontFamily = montserrat,
                     fontSize = 18.sp
                 )
             )
 
-            Spacer(modifier = Modifier.height(22.dp))
+            Spacer(modifier = Modifier.height(24.dp))
 
             TextField(
                 value = email,
@@ -131,7 +147,7 @@ fun RegisterScreen(modifier: Modifier= Modifier){
                 placeholder = {
                     Text(
                         "Email...",
-//                        fontFamily = montserrat,
+                        fontFamily = montserrat,
                         fontSize = 18.sp
                     )
                 },
@@ -157,12 +173,12 @@ fun RegisterScreen(modifier: Modifier= Modifier){
                 ),
                 shape = RoundedCornerShape(15.dp),
                 textStyle = TextStyle(
-//                    fontFamily = montserrat,
+                    fontFamily = montserrat,
                     fontSize = 18.sp
                 )
             )
 
-            Spacer(modifier = Modifier.height(22.dp))
+            Spacer(modifier = Modifier.height(24.dp))
 
             TextField(
                 value = password,
@@ -170,7 +186,7 @@ fun RegisterScreen(modifier: Modifier= Modifier){
                 placeholder = {
                     Text(
                         "Password...",
-//                        fontFamily = montserrat,
+                        fontFamily = montserrat,
                         fontSize = 18.sp
                     )
                 },
@@ -189,12 +205,12 @@ fun RegisterScreen(modifier: Modifier= Modifier){
                 ),
                 shape = RoundedCornerShape(15.dp),
                 textStyle = TextStyle(
-//                    fontFamily = montserrat,
+                    fontFamily = montserrat,
                     fontSize = 18.sp
                 )
             )
 
-            Spacer(modifier = Modifier.height(18.dp))
+            Spacer(modifier = Modifier.height(24.dp))
 
             TextField(
                 value = confirmPassword,
@@ -202,7 +218,7 @@ fun RegisterScreen(modifier: Modifier= Modifier){
                 placeholder = {
                     Text(
                         "Confirm Password...",
-//                        fontFamily = montserrat,
+                        fontFamily = montserrat,
                         fontSize = 18.sp
                     )
                 },
@@ -221,14 +237,40 @@ fun RegisterScreen(modifier: Modifier= Modifier){
                 ),
                 shape = RoundedCornerShape(15.dp),
                 textStyle = TextStyle(
-//                    fontFamily = montserrat,
+                    fontFamily = montserrat,
                     fontSize = 18.sp
                 )
             )
 
-            Spacer(modifier = Modifier.height(32.dp))
+            Spacer(modifier = Modifier.height(62.dp))
 
+            Button(
+                onClick = { },
+                colors = ButtonDefaults.buttonColors(containerColor = Color.Black),
+                shape = RoundedCornerShape(50),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(55.dp)
+            ) {
+                Text(
+                    text = "Sign up",
+                    color = Color.White,
+                    fontFamily = montserrat,
+                    fontWeight = FontWeight.SemiBold,
+                    fontSize = 22.sp
+                )
+            }
 
+            Spacer(modifier = Modifier.height(64.dp))
+
+            Text(
+                text = "Already have an account? Log in",
+                fontFamily = montserrat,
+                fontWeight = FontWeight.Normal,
+                fontSize = 16.sp,
+                modifier = Modifier.fillMaxWidth(),
+                textAlign = TextAlign.Center
+            )
         }
     }
 }
