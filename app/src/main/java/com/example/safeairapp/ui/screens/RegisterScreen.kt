@@ -1,6 +1,8 @@
 package com.example.safeairapp.ui.screens
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -8,7 +10,12 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -20,6 +27,8 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -64,7 +73,7 @@ fun RegisterScreen(modifier: Modifier= Modifier){
                     .height(90.dp)
             )
 
-            Spacer(modifier = Modifier.height(52.dp))
+            Spacer(modifier = Modifier.height(50.dp))
 
             Text(
                 text = "Create Account!",
@@ -73,6 +82,148 @@ fun RegisterScreen(modifier: Modifier= Modifier){
                 fontSize = 34.sp,
                 modifier = Modifier.fillMaxWidth(),
                 textAlign = TextAlign.Center
+            )
+
+            Spacer(modifier = Modifier.height(56.dp))
+
+            TextField(
+                value = fullName,
+                onValueChange = { fullName = it },
+                placeholder = {
+                    Text(
+                        "Full Name...",
+//                        fontFamily = montserrat,
+                        fontSize = 18.sp
+                    )
+                },
+                trailingIcon = {
+                    Icon(
+                        painter = painterResource(R.drawable.user_icon),
+                        contentDescription = "User icon",
+                        tint = Color.Black,
+                        modifier = Modifier.size(22.dp)
+                    )
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(52.dp)
+                    .background(brush = gradient, shape = RoundedCornerShape(15.dp))
+                    .border(1.dp, Color.Black, RoundedCornerShape(15.dp)),
+                colors = TextFieldDefaults.colors(
+                    focusedContainerColor = Color.Transparent,
+                    unfocusedContainerColor = Color.Transparent,
+                    disabledContainerColor = Color.Transparent,
+                    focusedIndicatorColor = Color.Transparent,
+                    unfocusedIndicatorColor = Color.Transparent
+                ),
+                shape = RoundedCornerShape(15.dp),
+                textStyle = TextStyle(
+//                    fontFamily = montserrat,
+                    fontSize = 18.sp
+                )
+            )
+
+            Spacer(modifier = Modifier.height(22.dp))
+
+            TextField(
+                value = email,
+                onValueChange = { email = it },
+                placeholder = {
+                    Text(
+                        "Email...",
+//                        fontFamily = montserrat,
+                        fontSize = 18.sp
+                    )
+                },
+                trailingIcon = {
+                    Icon(
+                        painter = painterResource(R.drawable.mail),
+                        contentDescription = "Email icon",
+                        tint = Color.Black,
+                        modifier = Modifier.size(22.dp)
+                    )
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(52.dp)
+                    .background(brush = gradient, shape = RoundedCornerShape(15.dp))
+                    .border(1.dp, Color.Black, RoundedCornerShape(15.dp)),
+                colors = TextFieldDefaults.colors(
+                    focusedContainerColor = Color.Transparent,
+                    unfocusedContainerColor = Color.Transparent,
+                    disabledContainerColor = Color.Transparent,
+                    focusedIndicatorColor = Color.Transparent,
+                    unfocusedIndicatorColor = Color.Transparent
+                ),
+                shape = RoundedCornerShape(15.dp),
+                textStyle = TextStyle(
+//                    fontFamily = montserrat,
+                    fontSize = 18.sp
+                )
+            )
+
+            Spacer(modifier = Modifier.height(22.dp))
+
+            TextField(
+                value = password,
+                onValueChange = { password = it },
+                placeholder = {
+                    Text(
+                        "Password...",
+//                        fontFamily = montserrat,
+                        fontSize = 18.sp
+                    )
+                },
+                visualTransformation = PasswordVisualTransformation(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(52.dp)
+                    .background(brush = gradient, shape = RoundedCornerShape(15.dp))
+                    .border(1.dp, Color.Black, RoundedCornerShape(15.dp)),
+                colors = TextFieldDefaults.colors(
+                    focusedContainerColor = Color.Transparent,
+                    unfocusedContainerColor = Color.Transparent,
+                    disabledContainerColor = Color.Transparent,
+                    focusedIndicatorColor = Color.Transparent,
+                    unfocusedIndicatorColor = Color.Transparent
+                ),
+                shape = RoundedCornerShape(15.dp),
+                textStyle = TextStyle(
+//                    fontFamily = montserrat,
+                    fontSize = 18.sp
+                )
+            )
+
+            Spacer(modifier = Modifier.height(18.dp))
+
+            TextField(
+                value = confirmPassword,
+                onValueChange = { confirmPassword = it },
+                placeholder = {
+                    Text(
+                        "Confirm Password...",
+//                        fontFamily = montserrat,
+                        fontSize = 18.sp
+                    )
+                },
+                visualTransformation = PasswordVisualTransformation(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(52.dp)
+                    .background(brush = gradient, shape = RoundedCornerShape(15.dp))
+                    .border(1.dp, Color.Black, RoundedCornerShape(15.dp)),
+                colors = TextFieldDefaults.colors(
+                    focusedContainerColor = Color.Transparent,
+                    unfocusedContainerColor = Color.Transparent,
+                    disabledContainerColor = Color.Transparent,
+                    focusedIndicatorColor = Color.Transparent,
+                    unfocusedIndicatorColor = Color.Transparent
+                ),
+                shape = RoundedCornerShape(15.dp),
+                textStyle = TextStyle(
+//                    fontFamily = montserrat,
+                    fontSize = 18.sp
+                )
             )
 
             Spacer(modifier = Modifier.height(32.dp))
