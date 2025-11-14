@@ -16,13 +16,18 @@ fun AppNavigation() {
     ) {
         composable("login") {
             LoginScreen(
-                onSignUpClick = { navController.navigate("register") }
+                onSignUpClick = { navController.navigate("register")},
+                onSignInClick = { navController.navigate("home")}
             )
         }
         composable("register") {
             RegisterScreen(
-                onLoginClick = { navController.navigate("login") }
+                onLoginClick = { navController.navigate("login") },
+                onSignUpComplete = { navController.navigate("home") }
             )
+        }
+        composable("home") {
+            HomeScreen()
         }
     }
 }

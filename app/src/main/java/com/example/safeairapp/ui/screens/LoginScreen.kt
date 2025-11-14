@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
@@ -34,6 +35,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -43,9 +45,14 @@ import com.example.safeairapp.R
 
 
 @Composable
-fun LoginScreen(modifier: Modifier = Modifier, onSignUpClick: () -> Unit = {}){
+fun LoginScreen(modifier: Modifier = Modifier,
+                onSignUpClick: () -> Unit = {},
+                onSignInClick: () -> Unit = {}){
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+
+    var emailError by remember { mutableStateOf("") }
+    var passwordError by remember { mutableStateOf("") }
 
     val monsteratt = FontFamily(
         Font(R.font.montserrat_light, FontWeight.Light),
@@ -81,7 +88,7 @@ fun LoginScreen(modifier: Modifier = Modifier, onSignUpClick: () -> Unit = {}){
             .padding(horizontal = 60.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(10.dp))
 
             Text(
                 text = "Login",
@@ -96,7 +103,10 @@ fun LoginScreen(modifier: Modifier = Modifier, onSignUpClick: () -> Unit = {}){
 
             TextField(
                 value = email,
-                onValueChange = { email = it },
+                onValueChange = {
+                    email = it
+                    emailError = ""
+                                },
                 placeholder = {
                     Text(
                         "Email...",
@@ -131,11 +141,24 @@ fun LoginScreen(modifier: Modifier = Modifier, onSignUpClick: () -> Unit = {}){
                 )
             )
 
-            Spacer(modifier = Modifier.height(24.dp))
+            Text(
+                text = emailError,
+                color = Color.Red,
+                fontSize = 12.sp,
+                fontFamily = monsteratt,
+                modifier = Modifier
+                    .padding(start = 2.dp, top = 1.dp)
+                    .align(Alignment.Start)
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
 
             TextField(
                 value = password,
-                onValueChange = { password = it },
+                onValueChange = {
+                    password = it
+                    passwordError = ""
+                                },
                 placeholder = {
                     Text(
                         "Password...",
@@ -163,7 +186,17 @@ fun LoginScreen(modifier: Modifier = Modifier, onSignUpClick: () -> Unit = {}){
                 )
             )
 
-            Spacer(modifier = Modifier.height(12.dp))
+            Text(
+                text = passwordError,
+                color = Color.Red,
+                fontSize = 12.sp,
+                fontFamily = monsteratt,
+                modifier = Modifier
+                    .padding(start = 2.dp, top = 1.dp)
+                    .align(Alignment.Start)
+            )
+
+            Spacer(modifier = Modifier.height(2.dp))
 
             Text(
                 text = "Forgot Password?",
@@ -177,7 +210,24 @@ fun LoginScreen(modifier: Modifier = Modifier, onSignUpClick: () -> Unit = {}){
             Spacer(modifier = Modifier.height(28.dp))
 
             Button (
-                onClick = {},
+                onClick = {
+                    var hasError = false
+
+                    if (email.isBlank()) {
+                        emailError = "Please enter your email"
+                        hasError = true
+                    }
+
+                    if (password.isBlank()) {
+                        passwordError = "Please enter your password"
+                        hasError = true
+                    }
+
+                    if (!hasError) {
+                        onSignInClick()
+                    }
+
+                },
                 colors = ButtonDefaults.buttonColors(containerColor = Color.Black),
                 shape = RoundedCornerShape(50),
                 modifier = Modifier

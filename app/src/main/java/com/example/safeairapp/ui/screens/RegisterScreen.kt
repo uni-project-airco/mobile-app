@@ -42,11 +42,17 @@ import androidx.compose.ui.unit.sp
 import com.example.safeairapp.R
 
 @Composable
-fun RegisterScreen(modifier: Modifier= Modifier, onLoginClick: () -> Unit = {}){
+fun RegisterScreen(modifier: Modifier= Modifier, onLoginClick: () -> Unit = {},
+                   onSignUpComplete: () -> Unit = {}){
     var fullName by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
+
+    var fullNameError by remember { mutableStateOf("") }
+    var emailError by remember { mutableStateOf("") }
+    var passwordError by remember { mutableStateOf("") }
+    var confirmPasswordError by remember { mutableStateOf("") }
 
     val montserrat = FontFamily(
         Font(R.font.montserrat_light, FontWeight.Light),
@@ -105,7 +111,10 @@ fun RegisterScreen(modifier: Modifier= Modifier, onLoginClick: () -> Unit = {}){
 
             TextField(
                 value = fullName,
-                onValueChange = { fullName = it },
+                onValueChange = {
+                    fullName = it
+                    fullNameError = ""
+                                },
                 placeholder = {
                     Text(
                         "Full Name...",
@@ -140,11 +149,21 @@ fun RegisterScreen(modifier: Modifier= Modifier, onLoginClick: () -> Unit = {}){
                 )
             )
 
-            Spacer(modifier = Modifier.height(24.dp))
+            Text(
+                text = fullNameError,
+                color = Color.Red,
+                fontSize = 12.sp,
+                modifier = Modifier.align(Alignment.Start)
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
 
             TextField(
                 value = email,
-                onValueChange = { email = it },
+                onValueChange = {
+                    email = it
+                    emailError = ""
+                                },
                 placeholder = {
                     Text(
                         "Email...",
@@ -179,11 +198,21 @@ fun RegisterScreen(modifier: Modifier= Modifier, onLoginClick: () -> Unit = {}){
                 )
             )
 
-            Spacer(modifier = Modifier.height(24.dp))
+            Text(
+                text = emailError,
+                color = Color.Red,
+                fontSize = 12.sp,
+                modifier = Modifier.align(Alignment.Start)
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
 
             TextField(
                 value = password,
-                onValueChange = { password = it },
+                onValueChange = {
+                    password = it
+                    passwordError = ""
+                                },
                 placeholder = {
                     Text(
                         "Password...",
@@ -211,11 +240,21 @@ fun RegisterScreen(modifier: Modifier= Modifier, onLoginClick: () -> Unit = {}){
                 )
             )
 
-            Spacer(modifier = Modifier.height(24.dp))
+            Text(
+                text = passwordError,
+                color = Color.Red,
+                fontSize = 12.sp,
+                modifier = Modifier.align(Alignment.Start)
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
 
             TextField(
                 value = confirmPassword,
-                onValueChange = { confirmPassword = it },
+                onValueChange = {
+                    confirmPassword = it
+                    confirmPasswordError = ""
+                                },
                 placeholder = {
                     Text(
                         "Confirm Password...",
@@ -243,10 +282,42 @@ fun RegisterScreen(modifier: Modifier= Modifier, onLoginClick: () -> Unit = {}){
                 )
             )
 
-            Spacer(modifier = Modifier.height(62.dp))
+            Text(
+                text = confirmPasswordError,
+                color = Color.Red,
+                fontSize = 12.sp,
+                modifier = Modifier.align(Alignment.Start)
+            )
+
+            Spacer(modifier = Modifier.height(38.dp))
 
             Button(
-                onClick = { },
+                onClick = {
+                    var valid = true
+
+                    if (fullName.isBlank()) {
+                        fullNameError = "Please enter your name"
+                        valid = false
+                    }
+                    if (email.isBlank()) {
+                        emailError = "Please enter your email"
+                        valid = false
+                    }
+                    if (password.isBlank()) {
+                        passwordError = "Please enter your password"
+                        valid = false
+                    }
+                    if (confirmPassword.isBlank()) {
+                        confirmPasswordError = "Please confirm your password"
+                        valid = false
+                    }
+                    if (password != confirmPassword) {
+                        confirmPasswordError = "Passwords do not match"
+                        valid = false
+                    }
+
+                    if (valid) onSignUpComplete()
+                },
                 colors = ButtonDefaults.buttonColors(containerColor = Color.Black),
                 shape = RoundedCornerShape(50),
                 modifier = Modifier
