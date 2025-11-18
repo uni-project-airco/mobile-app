@@ -36,7 +36,7 @@ import java.util.Date
 import java.util.Locale
 
 @Composable
-fun HomeScreen(airQualityValue: Float = 65f, notifications: Int = 2) {
+fun HomeScreen(airQualityValue: Float = 15f, notifications: Int = 2) {
 
     BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
 
@@ -116,6 +116,55 @@ fun getFormattedToday(): String {
 }
 
 @Composable
+fun AirIndicatorsRow() {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 24.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+
+        IndicatorItem(R.drawable.temperature_sensor, "Temperature")
+        IndicatorItem(R.drawable.humidity, "Humidity")
+        IndicatorItem(R.drawable.co2, "CO2")
+        IndicatorItem(R.drawable.dust, "Dust")
+    }
+}
+
+@Composable
+fun IndicatorItem(icon: Int, label: String) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Box(
+            modifier = Modifier
+                .size(55.dp)
+                .background(
+                    color = Color(0xFFFFF8ED).copy(alpha = 0.8f),
+                    shape = RoundedCornerShape(50)
+                ),
+            contentAlignment = Alignment.Center
+        ) {
+            Image(
+                painter = painterResource(icon),
+                contentDescription = label,
+                modifier = Modifier.size(31.dp)
+            )
+        }
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Text(
+            text = label,
+            fontSize = 15.sp,
+            color = Color.Black
+        )
+    }
+}
+
+
+@Composable
 fun HeaderBar(notifications: Int) {
     Row (
         modifier = Modifier
@@ -141,7 +190,7 @@ fun HeaderBar(notifications: Int) {
                 modifier = Modifier
                     .size(42.dp)
                     .background(
-                        color = Color(0xFFFFF3D4).copy(alpha = 0.5f),
+                        color = Color(0xFFFFF8ED).copy(alpha = 0.5f),
                         shape = RoundedCornerShape(50)
                     )
             )
@@ -157,7 +206,7 @@ fun HeaderBar(notifications: Int) {
                     modifier = Modifier
                         .size(22.dp)
                         .align(Alignment.TopEnd)
-                        .offset(x = 6.dp, y = (-2).dp),
+                        .offset(x = 5.dp, y = (-2).dp),
                     contentAlignment = Alignment.Center
                 ) {
                     Box(
@@ -212,7 +261,7 @@ fun AirQualityHeader(airValue: Float, modifier: Modifier = Modifier) {
                     color = Color.Black.copy(alpha = 0.6f)
                 )
 
-                Spacer(modifier = Modifier.height(50.dp))
+                Spacer(modifier = Modifier.height(45.dp))
             }
 
             Row(
@@ -250,6 +299,12 @@ fun AirQualityHeader(airValue: Float, modifier: Modifier = Modifier) {
                     modifier = Modifier.requiredSize(230.dp)
                 )
             }
+
+            Spacer(modifier = Modifier.height(25.dp))
+
+            AirIndicatorsRow()
+
+            Spacer(modifier = Modifier.height(20.dp))
         }
     }
 }
