@@ -261,7 +261,7 @@ fun AirQualityHeader(airValue: Float, modifier: Modifier = Modifier) {
                     color = Color.Black.copy(alpha = 0.6f)
                 )
 
-                Spacer(modifier = Modifier.height(45.dp))
+                Spacer(modifier = Modifier.height(5.dp))
             }
 
             Row(
@@ -296,11 +296,11 @@ fun AirQualityHeader(airValue: Float, modifier: Modifier = Modifier) {
                 Image(
                     painter = painterResource(id = imageRes),
                     contentDescription = "Air quality illustration",
-                    modifier = Modifier.requiredSize(230.dp)
+                    modifier = Modifier.requiredSize(360.dp)
                 )
             }
 
-            Spacer(modifier = Modifier.height(25.dp))
+            Spacer(modifier = Modifier.height(5.dp))
 
             AirIndicatorsRow()
 
