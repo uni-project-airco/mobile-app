@@ -80,6 +80,53 @@ fun HomeScreen(airQualityValue: Float = 15f, notifications: Int = 2) {
     }
 }
 
+@Composable
+fun AlertThresholdInfoCard() {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(
+                color = Color(0x4DCDECFF),              // 30% прозрачности
+                shape = RoundedCornerShape(22.dp)
+            )
+            .border(
+                width = 1.dp,
+                color = Color(0xFFA7BEC8),
+                shape = RoundedCornerShape(22.dp)
+            )
+            .padding(20.dp)
+    ) {
+
+        Column {
+
+            Row(verticalAlignment = Alignment.CenterVertically) {
+
+                Image(
+                    painter = painterResource(id = R.drawable.alert_info),
+                    contentDescription = "info",
+                    modifier = Modifier.size(26.dp)
+                )
+
+                Spacer(modifier = Modifier.width(12.dp))
+
+                Text(
+                    text = "How to adjust your alert thresholds",
+                    fontSize = 20.sp,
+                    color = Color.Black
+                )
+            }
+
+            Spacer(modifier = Modifier.height(14.dp))
+
+            Text(
+                text = "You can also adjust your alert thresholds in Settings → Customise thresholds for a detailed view of all parameters.",
+                fontSize = 15.sp,
+                color = Color.Black.copy(alpha = 0.75f),
+                lineHeight = 20.sp
+            )
+        }
+    }
+}
 
 
 @Composable
@@ -103,7 +150,7 @@ fun SensorCard(
             .background(Color.White, RoundedCornerShape(22.dp))
             .border(
                 width = 1.dp,
-                color = Color(0xFFE6E6E6),      
+                color = Color(0xFFA8A8A8),
                 shape = RoundedCornerShape(22.dp)
             )
             .padding(horizontal = 18.dp, vertical = 20.dp)
@@ -202,6 +249,19 @@ fun SensorsList() {
             unit = "µg/m³",
             status = "Good"
         )
+
+        Spacer(modifier = Modifier.height(22.dp))
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(1.dp)
+                .background(Color(0xFFE6E6E6))
+        )
+        Spacer(modifier = Modifier.height(22.dp))
+
+        AlertThresholdInfoCard()
+
+        Spacer(modifier = Modifier.height(40.dp))
     }
 }
 
