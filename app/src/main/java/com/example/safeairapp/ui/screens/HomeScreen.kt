@@ -2,6 +2,7 @@ package com.example.safeairapp.ui.screens
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -15,6 +16,7 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -30,6 +32,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.zIndex
 import com.example.safeairapp.R
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -38,36 +41,170 @@ import java.util.Locale
 @Composable
 fun HomeScreen(airQualityValue: Float = 15f, notifications: Int = 2) {
 
-    BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState()) // ← вся страница скроллится
+    ) {
 
-        val totalHeight = maxHeight
-        val headerHeight = totalHeight * 0.8f
-        val whiteBlockStart = totalHeight * 0.75f
-
-        AirQualityHeader(
-            airValue = airQualityValue,
+        Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(headerHeight)
-        )
+        ) {
 
-        HeaderBar(notifications = notifications)
+            AirQualityHeader(
+                airValue = airQualityValue,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(700.dp)
+            )
+
+            HeaderBar(notifications = notifications)
+        }
 
         Surface(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(top = whiteBlockStart)
-                .verticalScroll(rememberScrollState()),
-            color = Color.White,
-            shape = RoundedCornerShape(topStart = 40.dp, topEnd = 40.dp)
+            modifier = Modifier.fillMaxWidth().offset(y = (-35).dp),
+            shape = RoundedCornerShape(topStart = 40.dp, topEnd = 40.dp),
+            color = Color.White
         ) {
-            Column(Modifier.padding(24.dp)) {
-                Text("Content goes here...")
-                Spacer(modifier = Modifier.height(1200.dp))
+            Column(
+                modifier = Modifier
+                    .padding(24.dp)
+            ) {
+
+                SensorsList()
+
+                Spacer(modifier = Modifier.height(60.dp))
             }
         }
     }
 }
+
+
+
+@Composable
+fun SensorCard(
+    icon: Int,
+    title: String,
+    value: String,
+    unit: String,
+    status: String
+) {
+    val statusColor = when (status) {
+        "Good" -> Color(0xFF5BC45F)
+        "Warning" -> Color(0xFFE9A84C)
+        "Bad" -> Color(0xFFD9534F)
+        else -> Color.Gray
+    }
+
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(Color.White, RoundedCornerShape(22.dp))
+            .border(
+                width = 1.dp,
+                color = Color(0xFFE6E6E6),      
+                shape = RoundedCornerShape(22.dp)
+            )
+            .padding(horizontal = 18.dp, vertical = 20.dp)
+    ) {
+
+        Column {
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Image(
+                        painter = painterResource(icon),
+                        contentDescription = title,
+                        modifier = Modifier.size(32.dp)
+                    )
+                    Spacer(Modifier.width(12.dp))
+                    Text(title, fontSize = 22.sp, color = Color.Black)
+                }
+
+                Box(
+                    modifier = Modifier
+                        .background(statusColor.copy(alpha = 0.2f), RoundedCornerShape(10.dp))
+                        .padding(horizontal = 14.dp, vertical = 6.dp)
+                ) {
+                    Text(status, color = statusColor, fontSize = 16.sp)
+                }
+            }
+
+            Spacer(Modifier.height(14.dp))
+
+            Text(
+                text = value + " " + unit,
+                fontSize = 36.sp,
+                color = Color.Black
+            )
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+
+                Text(
+                    text = "Current value",
+                    fontSize = 15.sp,
+                    color = Color.Gray
+                )
+
+                Text(
+                    text = "More details >",
+                    fontSize = 17.sp,
+                    color = Color.Black.copy(alpha = 0.75f)
+                )
+            }
+        }
+    }
+}
+
+
+@Composable
+fun SensorsList() {
+    Column(verticalArrangement = Arrangement.spacedBy(18.dp)) {
+        Spacer(modifier = Modifier.height(10.dp))
+        SensorCard(
+            icon = R.drawable.temperature_card,
+            title = "Temperature",
+            value = "22.5",
+            unit = "°C",
+            status = "Good"
+        )
+
+        SensorCard(
+            icon = R.drawable.humidity_card,
+            title = "Humidity",
+            value = "45",
+            unit = "%",
+            status = "Warning"
+        )
+
+        SensorCard(
+            icon = R.drawable.co2_card,
+            title = "CO₂ Level",
+            value = "850",
+            unit = "ppm",
+            status = "Warning"
+        )
+
+        SensorCard(
+            icon = R.drawable.dust_card,
+            title = "PM2.5",
+            value = "12.3",
+            unit = "µg/m³",
+            status = "Good"
+        )
+    }
+}
+
 
 fun getGradientForAirQuality(value: Float): Brush {
     return when {
@@ -124,7 +261,6 @@ fun AirIndicatorsRow() {
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-
         IndicatorItem(R.drawable.temperature_sensor, "Temperature")
         IndicatorItem(R.drawable.humidity, "Humidity")
         IndicatorItem(R.drawable.co2, "CO2")
@@ -165,7 +301,7 @@ fun IndicatorItem(icon: Int, label: String) {
 
 
 @Composable
-fun HeaderBar(notifications: Int) {
+fun HeaderBar(notifications: Int, modifier: Modifier = Modifier) {
     Row (
         modifier = Modifier
             .fillMaxWidth()
