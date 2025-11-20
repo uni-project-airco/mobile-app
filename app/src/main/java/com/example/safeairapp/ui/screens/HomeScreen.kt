@@ -3,6 +3,7 @@ package com.example.safeairapp.ui.screens
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -23,11 +24,16 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -41,42 +47,148 @@ import java.util.Locale
 @Composable
 fun HomeScreen(airQualityValue: Float = 15f, notifications: Int = 2) {
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .verticalScroll(rememberScrollState()) // ← вся страница скроллится
-    ) {
+    var selectedTab by remember { mutableStateOf("home") }
+
+    Box(modifier = Modifier.fillMaxSize()) {
+
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+        ) {
+
+            Box(modifier = Modifier.fillMaxWidth()) {
+
+                AirQualityHeader(
+                    airValue = airQualityValue,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(700.dp)
+                )
+
+                HeaderBar(notifications = notifications)
+            }
+
+            Surface(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .offset(y = (-35).dp),
+                shape = RoundedCornerShape(topStart = 40.dp, topEnd = 40.dp),
+                color = Color.White
+            ) {
+                Column(modifier = Modifier.padding(24.dp)) {
+
+                    SensorsList()
+
+                    Spacer(modifier = Modifier.height(120.dp))
+                }
+            }
+        }
 
         Box(
             modifier = Modifier
-                .fillMaxWidth()
+                .align(Alignment.BottomCenter)
+                .padding(bottom = 8.dp)
+        ) {
+            BottomNavBar(
+                selected = selectedTab,
+                onTabSelected = { selectedTab = it }
+            )
+        }
+    }
+}
+
+@Composable
+fun BottomNavBar(
+    selected: String,
+    onTabSelected: (String) -> Unit
+) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 12.dp, vertical = 5.dp)
+            .background(
+                color = Color(0xFF1E1E1E),
+                shape = RoundedCornerShape(36.dp)
+            )
+            .padding(horizontal = 26.dp, vertical = 10.dp)
+    ) {
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
         ) {
 
-            AirQualityHeader(
-                airValue = airQualityValue,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(700.dp)
+            BottomNavItem(
+                icon = R.drawable.home,
+                label = "Home",
+                isSelected = selected == "home",
+                onClick = { onTabSelected("home") }
             )
 
-            HeaderBar(notifications = notifications)
+            BottomNavItem(
+                icon = R.drawable.tips,
+                label = "Tips",
+                isSelected = selected == "tips",
+                onClick = { onTabSelected("tips") }
+            )
+
+            BottomNavItem(
+                icon = R.drawable.history,
+                label = "History",
+                isSelected = selected == "history",
+                onClick = { onTabSelected("history") }
+            )
+
+            BottomNavItem(
+                icon = R.drawable.settings,
+                label = "Settings",
+                isSelected = selected == "settings",
+                onClick = { onTabSelected("settings") }
+            )
         }
+    }
+}
 
-        Surface(
-            modifier = Modifier.fillMaxWidth().offset(y = (-35).dp),
-            shape = RoundedCornerShape(topStart = 40.dp, topEnd = 40.dp),
-            color = Color.White
+@Composable
+fun BottomNavItem(
+    icon: Int,
+    label: String,
+    isSelected: Boolean,
+    onClick: () -> Unit
+) {
+    if (isSelected) {
+        Row(
+            modifier = Modifier
+                .background(Color(0xFF3D3D3D), RoundedCornerShape(35.dp))
+                .clickable { onClick() }
+                .padding(horizontal = 16.dp, vertical = 10.dp),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Column(
-                modifier = Modifier
-                    .padding(24.dp)
-            ) {
-
-                SensorsList()
-
-                Spacer(modifier = Modifier.height(60.dp))
+            Image(
+                painter = painterResource(icon),
+                contentDescription = label,
+                modifier = Modifier.size(25.dp)
+            )
+            if (label.isNotEmpty()) {
+                Spacer(Modifier.width(8.dp))
+                Text(
+                    text = label,
+                    color = Color.White,
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.SemiBold
+                )
             }
         }
+    } else {
+        Image(
+            painter = painterResource(icon),
+            contentDescription = label,
+            modifier = Modifier
+                .size(25.dp)
+                .clickable { onClick() }
+        )
     }
 }
 
@@ -86,7 +198,7 @@ fun AlertThresholdInfoCard() {
         modifier = Modifier
             .fillMaxWidth()
             .background(
-                color = Color(0x4DCDECFF),              // 30% прозрачности
+                color = Color(0x4DCDECFF),
                 shape = RoundedCornerShape(22.dp)
             )
             .border(
