@@ -52,38 +52,22 @@ fun HomeScreen(airQualityValue: Float = 15f, notifications: Int = 2) {
 
     Box(modifier = Modifier.fillMaxSize()) {
 
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .verticalScroll(rememberScrollState())
-        ) {
+        when (selectedTab) {
 
-            Box(modifier = Modifier.fillMaxWidth()) {
-
-                AirQualityHeader(
-                    airValue = airQualityValue,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(710.dp)
+            "home" -> {
+                HomeContent(
+                    airQualityValue = airQualityValue,
+                    notifications = notifications,
+                    onMoreDetailsClick = { selectedTab = "history" }
                 )
-
-                HeaderBar(notifications = notifications)
             }
 
-            Surface(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .offset(y = (-35).dp),
-                shape = RoundedCornerShape(topStart = 40.dp, topEnd = 40.dp),
-                color = Color.White
-            ) {
-                Column(modifier = Modifier.padding(24.dp)) {
-
-                    SensorsList()
-
-                    Spacer(modifier = Modifier.height(120.dp))
-                }
+            "history" -> {
+                HistoryScreen()
             }
+
+//            "tips" -> TipsScreen()
+//            "settings" -> SettingsScreen()
         }
 
         Box(
@@ -95,6 +79,49 @@ fun HomeScreen(airQualityValue: Float = 15f, notifications: Int = 2) {
                 selected = selectedTab,
                 onTabSelected = { selectedTab = it }
             )
+        }
+    }
+}
+
+@Composable
+fun HomeContent(
+    airQualityValue: Float,
+    notifications: Int,
+    onMoreDetailsClick: () -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState())
+    ) {
+
+        Box(modifier = Modifier.fillMaxWidth()) {
+
+            AirQualityHeader(
+                airValue = airQualityValue,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(710.dp)
+            )
+
+            HeaderBar(notifications = notifications)
+        }
+
+        Surface(
+            modifier = Modifier
+                .fillMaxWidth()
+                .offset(y = (-35).dp),
+            shape = RoundedCornerShape(topStart = 40.dp, topEnd = 40.dp),
+            color = Color.White
+        ) {
+            Column(modifier = Modifier.padding(24.dp)) {
+
+                SensorsList(
+                    onMoreDetailsClick = onMoreDetailsClick
+                )
+
+                Spacer(modifier = Modifier.height(120.dp))
+            }
         }
     }
 }
@@ -253,7 +280,8 @@ fun SensorCard(
     title: String,
     value: String,
     unit: String,
-    status: String
+    status: String,
+    onMoreDetailsClick: () -> Unit
 ) {
     val statusColor = when (status) {
         "Good" -> Color(0xFF5BC45F)
@@ -345,7 +373,8 @@ fun SensorCard(
                     fontSize = 17.sp,
                     fontFamily = Montserrat,
                     fontWeight = FontWeight.Medium,
-                    color = Color.Black.copy(alpha = 0.75f)
+                    color = Color.Black.copy(alpha = 0.75f),
+                    modifier = Modifier.clickable { onMoreDetailsClick() }
                 )
             }
         }
@@ -354,7 +383,7 @@ fun SensorCard(
 
 
 @Composable
-fun SensorsList() {
+fun SensorsList(onMoreDetailsClick: () -> Unit) {
     Column(verticalArrangement = Arrangement.spacedBy(18.dp)) {
         Spacer(modifier = Modifier.height(10.dp))
         SensorCard(
@@ -362,7 +391,8 @@ fun SensorsList() {
             title = "Temperature",
             value = "22.5",
             unit = "°C",
-            status = "Good"
+            status = "Good",
+            onMoreDetailsClick = onMoreDetailsClick
         )
 
         SensorCard(
@@ -370,7 +400,8 @@ fun SensorsList() {
             title = "Humidity",
             value = "45",
             unit = "%",
-            status = "Warning"
+            status = "Warning",
+            onMoreDetailsClick = onMoreDetailsClick
         )
 
         SensorCard(
@@ -378,7 +409,8 @@ fun SensorsList() {
             title = "CO₂ Level",
             value = "850",
             unit = "ppm",
-            status = "Warning"
+            status = "Warning",
+            onMoreDetailsClick = onMoreDetailsClick
         )
 
         SensorCard(
@@ -386,7 +418,8 @@ fun SensorsList() {
             title = "PM2.5",
             value = "12.3",
             unit = "µg/m³",
-            status = "Good"
+            status = "Good",
+            onMoreDetailsClick = onMoreDetailsClick
         )
 
         Spacer(modifier = Modifier.height(22.dp))

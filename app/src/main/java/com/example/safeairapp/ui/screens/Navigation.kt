@@ -29,5 +29,9 @@ fun AppNavigation() {
         composable("home") {
             HomeScreen()
         }
+
+        composable("history") {
+            HistoryScreen()
+        }
     }
 }
