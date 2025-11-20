@@ -33,5 +33,9 @@ fun AppNavigation() {
         composable("history") {
             HistoryScreen()
         }
+
+        composable("tips") {
+            TipsScreen()
+        }
     }
 }

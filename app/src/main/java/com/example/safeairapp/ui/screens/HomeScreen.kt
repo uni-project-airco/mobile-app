@@ -66,7 +66,10 @@ fun HomeScreen(airQualityValue: Float = 15f, notifications: Int = 2) {
                 HistoryScreen()
             }
 
-//            "tips" -> TipsScreen()
+            "tips" -> {
+                TipsScreen(notifications = notifications)
+            }
+
 //            "settings" -> SettingsScreen()
         }
 
@@ -433,7 +436,7 @@ fun SensorsList(onMoreDetailsClick: () -> Unit) {
 
         AlertThresholdInfoCard()
 
-        Spacer(modifier = Modifier.height(40.dp))
+        Spacer(modifier = Modifier.height(10.dp))
     }
 }
 
