@@ -40,6 +40,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import com.example.safeairapp.R
+import com.example.safeairapp.ui.theme.Montserrat
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -63,7 +64,7 @@ fun HomeScreen(airQualityValue: Float = 15f, notifications: Int = 2) {
                     airValue = airQualityValue,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(700.dp)
+                        .height(710.dp)
                 )
 
                 HeaderBar(notifications = notifications)
@@ -177,7 +178,8 @@ fun BottomNavItem(
                     text = label,
                     color = Color.White,
                     fontSize = 18.sp,
-                    fontWeight = FontWeight.SemiBold
+                    fontFamily = Montserrat,
+                    fontWeight = FontWeight.Bold,
                 )
             }
         }
@@ -224,6 +226,8 @@ fun AlertThresholdInfoCard() {
                 Text(
                     text = "How to adjust your alert thresholds",
                     fontSize = 20.sp,
+                    fontFamily = Montserrat,
+                    fontWeight = FontWeight.Bold,
                     color = Color.Black
                 )
             }
@@ -234,6 +238,8 @@ fun AlertThresholdInfoCard() {
                 text = "You can also adjust your alert thresholds in Settings → Customise thresholds for a detailed view of all parameters.",
                 fontSize = 15.sp,
                 color = Color.Black.copy(alpha = 0.75f),
+                fontFamily = Montserrat,
+                fontWeight = FontWeight.Medium,
                 lineHeight = 20.sp
             )
         }
@@ -253,6 +259,13 @@ fun SensorCard(
         "Good" -> Color(0xFF5BC45F)
         "Warning" -> Color(0xFFE9A84C)
         "Bad" -> Color(0xFFD9534F)
+        else -> Color.Gray
+    }
+
+    val statusColorText = when (status) {
+        "Good" -> Color(0xFF338D38)
+        "Warning" -> Color(0xFFBD832B)
+        "Bad" -> Color(0xFFAD3531)
         else -> Color.Gray
     }
 
@@ -283,7 +296,11 @@ fun SensorCard(
                         modifier = Modifier.size(32.dp)
                     )
                     Spacer(Modifier.width(12.dp))
-                    Text(title, fontSize = 22.sp, color = Color.Black)
+                    Text(title,
+                        fontSize = 22.sp,
+                        fontFamily = Montserrat,
+                        fontWeight = FontWeight.Medium,
+                        color = Color.Black)
                 }
 
                 Box(
@@ -291,7 +308,11 @@ fun SensorCard(
                         .background(statusColor.copy(alpha = 0.2f), RoundedCornerShape(10.dp))
                         .padding(horizontal = 14.dp, vertical = 6.dp)
                 ) {
-                    Text(status, color = statusColor, fontSize = 16.sp)
+                    Text(status,
+                        color = statusColorText,
+                        fontFamily = Montserrat,
+                        fontWeight = FontWeight.Medium,
+                        fontSize = 16.sp)
                 }
             }
 
@@ -299,7 +320,9 @@ fun SensorCard(
 
             Text(
                 text = value + " " + unit,
-                fontSize = 36.sp,
+                fontSize = 33.sp,
+                fontFamily = Montserrat,
+                fontWeight = FontWeight.Bold,
                 color = Color.Black
             )
 
@@ -312,12 +335,16 @@ fun SensorCard(
                 Text(
                     text = "Current value",
                     fontSize = 15.sp,
+                    fontFamily = Montserrat,
+                    fontWeight = FontWeight.Normal,
                     color = Color.Gray
                 )
 
                 Text(
                     text = "More details >",
                     fontSize = 17.sp,
+                    fontFamily = Montserrat,
+                    fontWeight = FontWeight.Medium,
                     color = Color.Black.copy(alpha = 0.75f)
                 )
             }
@@ -466,6 +493,8 @@ fun IndicatorItem(icon: Int, label: String) {
         Text(
             text = label,
             fontSize = 15.sp,
+            fontFamily = Montserrat,
+            fontWeight = FontWeight.Medium,
             color = Color.Black
         )
     }
@@ -527,6 +556,8 @@ fun HeaderBar(notifications: Int, modifier: Modifier = Modifier) {
                         text = notifications.toString(),
                         color = Color.White,
                         fontSize = 14.sp,
+                        fontFamily = Montserrat,
+                        fontWeight = FontWeight.Bold,
                         modifier = Modifier.offset(y = (-1).dp)
                     )
                 }
@@ -558,6 +589,8 @@ fun AirQualityHeader(airValue: Float, modifier: Modifier = Modifier) {
                 Text(
                     text = getFormattedToday(),
                     fontSize = 28.sp,
+                    fontFamily = Montserrat,
+                    fontWeight = FontWeight.Medium,
                     color = Color.Black
                 )
 
@@ -566,6 +599,8 @@ fun AirQualityHeader(airValue: Float, modifier: Modifier = Modifier) {
                 Text(
                     text = "Air quality category:",
                     fontSize = 16.sp,
+                    fontFamily = Montserrat,
+                    fontWeight = FontWeight.Normal,
                     color = Color.Black.copy(alpha = 0.6f)
                 )
 
@@ -580,7 +615,7 @@ fun AirQualityHeader(airValue: Float, modifier: Modifier = Modifier) {
             ) {
 
                 Box(
-                    modifier = Modifier.size(300.dp)
+                    modifier = Modifier.size(310.dp)
                 ) {
                     Image(
                         painter = painterResource(R.drawable.air_circles),
@@ -590,8 +625,10 @@ fun AirQualityHeader(airValue: Float, modifier: Modifier = Modifier) {
 
                     Text(
                         text = getAirQualityText(airValue),
-                        fontSize = 28.sp,
+                        fontSize = 27.sp,
                         lineHeight = 34.sp,
+                        fontFamily = Montserrat,
+                        fontWeight = FontWeight.Medium,
                         color = Color.Black,
                         textAlign = TextAlign.Center,
                         modifier = Modifier
