@@ -63,7 +63,7 @@ fun HomeScreen(airQualityValue: Float = 15f, notifications: Int = 2) {
             }
 
             "history" -> {
-                HistoryScreen()
+                HistoryScreen(notifications = notifications)
             }
 
             "tips" -> {

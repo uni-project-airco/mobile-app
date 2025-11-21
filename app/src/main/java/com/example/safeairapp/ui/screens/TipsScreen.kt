@@ -65,7 +65,7 @@ fun TipsHeader(notifications: Int) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .height(290.dp)
+            .height(280.dp)
             .background(
                 color = Color(0xFF1D1D1D),
                 shape = RoundedCornerShape(bottomStart = 30.dp, bottomEnd = 30.dp)
