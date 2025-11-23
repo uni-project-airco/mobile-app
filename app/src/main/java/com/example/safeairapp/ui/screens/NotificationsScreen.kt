@@ -22,9 +22,17 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -32,7 +40,12 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.safeairapp.R
+import com.example.safeairapp.services.PubNubService
 import com.example.safeairapp.ui.theme.Montserrat
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
+import java.util.concurrent.atomic.AtomicInteger
 
 data class NotificationItem(
     val id: Int,
@@ -91,12 +104,87 @@ val sampleNotifications = listOf(
         isNew = false
     )
 )
+
+// Helper function to get icon based on status
+fun getIconForStatus(status: String): Int = when (status.lowercase()) {
+    "high" -> R.drawable.high
+    "warning" -> R.drawable.warning
+    "info" -> R.drawable.warning_info
+    "success" -> R.drawable.checkmark
+    else -> R.drawable.warning_info
+}
+
+// Helper function to format time
+fun formatTimeAgo(timestamp: Long): String {
+    val now = System.currentTimeMillis()
+    val diff = now - timestamp
+    val seconds = diff / 1000
+    val minutes = seconds / 60
+    val hours = minutes / 60
+    val days = hours / 24
+
+    return when {
+        days > 0 -> "$days ${if (days == 1L) "day" else "days"} ago"
+        hours > 0 -> "$hours ${if (hours == 1L) "hour" else "hours"} ago"
+        minutes > 0 -> "$minutes ${if (minutes == 1L) "minute" else "minutes"} ago"
+        else -> "Just now"
+    }
+}
+
+// Counter for generating unique IDs
+private val notificationIdCounter = AtomicInteger(1000)
 @Composable
 fun NotificationsScreen(
     notifications: Int = 5,
     selectedTab: String = "notifications",
-    onTabSelected: (String) -> Unit
+    onTabSelected: (String) -> Unit,
+    publishKey: String = "pub-c-6b19366c-41f5-4c2e-acd2-72584e72cdca",
+    subscribeKey: String = "sub-c-2cfb801c-715b-494b-b401-12764cf0ecfa",
+    channelName: String = "notifications"
 ) {
+    val context = LocalContext.current
+    val pubNubService = remember { PubNubService() }
+    
+    // Collect PubNub notifications
+    val pubNubNotifications by pubNubService.notifications.collectAsState()
+    
+    // Combine sample notifications with PubNub notifications
+    var allNotifications by remember { 
+        mutableStateOf(sampleNotifications.toMutableList())
+    }
+    
+    // Initialize PubNub when screen is first displayed
+    LaunchedEffect(Unit) {
+        pubNubService.initialize(
+            publishKey = publishKey,
+            subscribeKey = subscribeKey,
+            channelName = channelName
+        )
+    }
+    
+    // Update notifications list when PubNub receives new messages
+    LaunchedEffect(pubNubNotifications) {
+        val newPubNubItems = pubNubNotifications.map { pubNubData ->
+            NotificationItem(
+                id = notificationIdCounter.getAndIncrement(),
+                icon = getIconForStatus(pubNubData.status),
+                title = pubNubData.title,
+                message = pubNubData.message,
+                time = formatTimeAgo(pubNubData.timestamp),
+                status = pubNubData.status,
+                isNew = true
+            )
+        }
+        
+        // Merge: PubNub notifications first, then sample notifications
+        // Remove duplicates by checking if notification already exists
+        val existingIds = allNotifications.map { it.id }.toSet()
+        val uniqueNewItems = newPubNubItems.filter { it.id !in existingIds }
+        
+        if (uniqueNewItems.isNotEmpty()) {
+            allNotifications = (uniqueNewItems + allNotifications).toMutableList()
+        }
+    }
 
     Box(modifier = Modifier.fillMaxSize()) {
 
@@ -106,7 +194,8 @@ fun NotificationsScreen(
                 .background(Color.White)
         ) {
 
-            NotificationsHeader(newCount = notifications)
+            val newCount = allNotifications.count { it.isNew }
+            NotificationsHeader(newCount = newCount)
 
             LazyColumn (
                 modifier = Modifier
@@ -129,7 +218,7 @@ fun NotificationsScreen(
                     )
                 }
 
-                items(sampleNotifications) { item ->
+                items(allNotifications) { item ->
                     NotificationCard(item)
                     Spacer(modifier = Modifier.height(18.dp))
                 }
