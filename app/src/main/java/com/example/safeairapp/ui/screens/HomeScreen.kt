@@ -46,32 +46,21 @@ import java.util.Date
 import java.util.Locale
 
 @Composable
-fun HomeScreen(airQualityValue: Float = 15f, notifications: Int = 2) {
+fun HomeScreen(selectedTab: String,
+               onTabSelected: (String) -> Unit,
+               airQualityValue: Float = 15f,
+               notifications: Int = 2,
+               onNotificationsClick: () -> Unit) {
 
-    var selectedTab by remember { mutableStateOf("home") }
 
     Box(modifier = Modifier.fillMaxSize()) {
 
-        when (selectedTab) {
-
-            "home" -> {
-                HomeContent(
-                    airQualityValue = airQualityValue,
-                    notifications = notifications,
-                    onMoreDetailsClick = { selectedTab = "history" }
-                )
-            }
-
-            "history" -> {
-                HistoryScreen(notifications = notifications)
-            }
-
-            "tips" -> {
-                TipsScreen(notifications = notifications)
-            }
-
-//            "settings" -> SettingsScreen()
-        }
+        HomeContent(
+            airQualityValue = airQualityValue,
+            notifications = notifications,
+            onMoreDetailsClick = { onTabSelected("history") },
+            onNotificationsClick = onNotificationsClick
+        )
 
         Box(
             modifier = Modifier
@@ -80,7 +69,7 @@ fun HomeScreen(airQualityValue: Float = 15f, notifications: Int = 2) {
         ) {
             BottomNavBar(
                 selected = selectedTab,
-                onTabSelected = { selectedTab = it }
+                onTabSelected = onTabSelected
             )
         }
     }
@@ -90,7 +79,8 @@ fun HomeScreen(airQualityValue: Float = 15f, notifications: Int = 2) {
 fun HomeContent(
     airQualityValue: Float,
     notifications: Int,
-    onMoreDetailsClick: () -> Unit
+    onMoreDetailsClick: () -> Unit,
+    onNotificationsClick: () -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -107,7 +97,10 @@ fun HomeContent(
                     .height(710.dp)
             )
 
-            HeaderBar(notifications = notifications)
+            HeaderBar(
+                notifications = notifications,
+                onNotificationsClick = onNotificationsClick
+            )
         }
 
         Surface(
@@ -138,11 +131,13 @@ fun BottomNavBar(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 12.dp, vertical = 5.dp)
+            .height(70.dp)
             .background(
                 color = Color(0xFF1E1E1E),
                 shape = RoundedCornerShape(36.dp)
             )
-            .padding(horizontal = 26.dp, vertical = 10.dp)
+            .padding(horizontal = 26.dp, vertical = 10.dp),
+        contentAlignment = Alignment.Center
     ) {
 
         Row(
@@ -418,7 +413,7 @@ fun SensorsList(onMoreDetailsClick: () -> Unit) {
 
         SensorCard(
             icon = R.drawable.dust_card,
-            title = "PM2.5",
+            title = "Dust",
             value = "12.3",
             unit = "µg/m³",
             status = "Good",
@@ -538,7 +533,7 @@ fun IndicatorItem(icon: Int, label: String) {
 
 
 @Composable
-fun HeaderBar(notifications: Int, modifier: Modifier = Modifier) {
+fun HeaderBar(notifications: Int, onNotificationsClick: () -> Unit, modifier: Modifier = Modifier) {
     Row (
         modifier = Modifier
             .fillMaxWidth()
@@ -571,7 +566,9 @@ fun HeaderBar(notifications: Int, modifier: Modifier = Modifier) {
             Image(
                 painter = painterResource(R.drawable.notification),
                 contentDescription = "Notifications",
-                modifier = Modifier.size(25.dp)
+                modifier = Modifier
+                    .size(25.dp)
+                    .clickable { onNotificationsClick() }
             )
 
             if (notifications > 0) {
@@ -693,29 +690,59 @@ fun AirQualityHeader(airValue: Float, modifier: Modifier = Modifier) {
 @Preview(name = "Very Bad", showBackground = true, heightDp = 900)
 @Composable
 fun PreviewVeryBad() {
-    HomeScreen(airQualityValue = 10f)
+    HomeScreen(
+        selectedTab = "home",
+        onTabSelected = {},
+        airQualityValue = 10f,
+        notifications = 2,
+        onNotificationsClick = {}
+    )
 }
 
 @Preview(name = "Bad", showBackground = true, heightDp = 900)
 @Composable
 fun PreviewBad() {
-    HomeScreen(airQualityValue = 30f)
+    HomeScreen(
+        selectedTab = "home",
+        onTabSelected = {},
+        airQualityValue = 30f,
+        notifications = 2,
+        onNotificationsClick = {}
+    )
 }
 
 @Preview(name = "Poor", showBackground = true, heightDp = 900)
 @Composable
 fun PreviewPoor() {
-    HomeScreen(airQualityValue = 45f)
+    HomeScreen(
+        selectedTab = "home",
+        onTabSelected = {},
+        airQualityValue = 45f,
+        notifications = 2,
+        onNotificationsClick = {}
+    )
 }
 
 @Preview(name = "Fair", showBackground = true, heightDp = 900)
 @Composable
 fun PreviewFair() {
-    HomeScreen(airQualityValue = 65f)
+    HomeScreen(
+        selectedTab = "home",
+        onTabSelected = {},
+        airQualityValue = 65f,
+        notifications = 2,
+        onNotificationsClick = {}
+    )
 }
 
 @Preview(name = "Good", showBackground = true, heightDp = 900)
 @Composable
 fun PreviewGood() {
-    HomeScreen(airQualityValue = 90f)
+    HomeScreen(
+        selectedTab = "home",
+        onTabSelected = {},
+        airQualityValue = 90f,
+        notifications = 2,
+        onNotificationsClick = {}
+    )
 }

@@ -19,11 +19,10 @@ import com.example.safeairapp.R
 import com.example.safeairapp.ui.theme.Montserrat
 
 @Composable
-fun HistoryScreen(
-    notifications: Int = 2,
-    selectedTab: String = "history",
-    onTabSelected: (String) -> Unit,
-    onNotificationsClick: () -> Unit
+fun NotificationsScreen(
+    notifications: Int = 5,
+    selectedTab: String = "notifications",
+    onTabSelected: (String) -> Unit
 ) {
 
     Box(modifier = Modifier.fillMaxSize()) {
@@ -34,10 +33,7 @@ fun HistoryScreen(
                 .background(Color.White)
         ) {
 
-            HistoryHeader(
-                notifications = notifications,
-                onNotificationsClick = onNotificationsClick
-            )
+            NotificationsHeader(newCount = notifications)
 
             Spacer(modifier = Modifier.height(40.dp))
 
@@ -48,7 +44,7 @@ fun HistoryScreen(
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = "History page\nComing soon...",
+                    text = "Notifications page\nComing soon...",
                     fontSize = 22.sp,
                     color = Color.Gray,
                     fontFamily = Montserrat,
@@ -73,12 +69,12 @@ fun HistoryScreen(
 
 
 @Composable
-fun HistoryHeader(notifications: Int, onNotificationsClick: () -> Unit) {
+fun NotificationsHeader(newCount: Int = 2) {
 
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .height(280.dp)
+            .height(260.dp)
             .background(
                 color = Color(0xFF1D1D1D),
                 shape = RoundedCornerShape(bottomStart = 30.dp, bottomEnd = 30.dp)
@@ -88,78 +84,52 @@ fun HistoryHeader(notifications: Int, onNotificationsClick: () -> Unit) {
 
         Column {
 
+            Image(
+                painter = painterResource(id = R.drawable.safeair_logo_w),
+                contentDescription = "Logo",
+                modifier = Modifier.size(40.dp)
+            )
+
+            Spacer(modifier = Modifier.height(40.dp))
+
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
 
-                Image(
-                    painter = painterResource(id = R.drawable.safeair_logo_w),
-                    contentDescription = "Logo",
-                    modifier = Modifier.size(40.dp)
+                Text(
+                    text = "Notifications",
+                    fontSize = 28.sp,
+                    fontFamily = Montserrat,
+                    fontWeight = FontWeight.SemiBold,
+                    color = Color.White
                 )
 
-                Box(
-                    modifier = Modifier.size(52.dp),
-                    contentAlignment = Alignment.Center
-                ) {
+                if (newCount > 0) {
                     Box(
                         modifier = Modifier
-                            .size(42.dp)
                             .background(
-                                Color.White.copy(alpha = 0.12f),
-                                RoundedCornerShape(50)
+                                color = Color(0xFF7A7A7A).copy(alpha = 0.45f),
+                                shape = RoundedCornerShape(8.dp)
                             )
-                    )
-
-                    Image(
-                        painter = painterResource(R.drawable.notification_w),
-                        contentDescription = "Notifications",
-                        modifier = Modifier.size(25.dp)
-                    )
-
-                    if (notifications > 0) {
-                        Box(
-                            modifier = Modifier
-                                .size(22.dp)
-                                .align(Alignment.TopEnd)
-                                .offset(x = 5.dp, y = (-2).dp),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Box(
-                                modifier = Modifier
-                                    .matchParentSize()
-                                    .background(Color.Red, RoundedCornerShape(50))
-                            )
-
-                            Text(
-                                text = notifications.toString(),
-                                color = Color.White,
-                                fontSize = 14.sp,
-                                fontFamily = Montserrat,
-                                fontWeight = FontWeight.Bold,
-                                modifier = Modifier.offset(y = (-1).dp)
-                            )
-                        }
+                            .padding(horizontal = 12.dp, vertical = 6.dp)
+                    ) {
+                        Text(
+                            text = "$newCount new",
+                            fontSize = 14.sp,
+                            fontFamily = Montserrat,
+                            fontWeight = FontWeight.SemiBold,
+                            color = Color.White
+                        )
                     }
                 }
             }
 
-            Spacer(modifier = Modifier.height(40.dp))
-
-            Text(
-                text = "History & Analytics",
-                fontSize = 26.sp,
-                fontFamily = Montserrat,
-                fontWeight = FontWeight.SemiBold,
-                color = Color.White
-            )
-
             Spacer(modifier = Modifier.height(10.dp))
 
             Text(
-                text = "View historical data and trends",
+                text = "Stay informed about air quality changes",
                 fontSize = 16.sp,
                 fontFamily = Montserrat,
                 fontWeight = FontWeight.Normal,
@@ -169,13 +139,13 @@ fun HistoryHeader(notifications: Int, onNotificationsClick: () -> Unit) {
     }
 }
 
+
 @Preview(showBackground = true)
 @Composable
-fun PreviewHistoryScreen() {
-    HistoryScreen(
-        notifications = 2,
-        selectedTab = "history",
-        onTabSelected = {},
-        onNotificationsClick = {}
+fun PreviewNotificationsScreen() {
+    NotificationsScreen(
+        notifications = 5,
+        selectedTab = "notifications",
+        onTabSelected = {}
     )
 }

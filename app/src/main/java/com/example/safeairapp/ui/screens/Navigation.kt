@@ -27,15 +27,37 @@ fun AppNavigation() {
             )
         }
         composable("home") {
-            HomeScreen()
+            HomeScreen(
+                selectedTab = "home",
+                onTabSelected = { navController.navigate(it) },
+                onNotificationsClick = { navController.navigate("notifications") }
+            )
         }
+
+
 
         composable("history") {
-            HistoryScreen()
+            HistoryScreen(
+                selectedTab = "history",
+                onTabSelected = { navController.navigate(it) },
+                onNotificationsClick = { navController.navigate("notifications")}
+            )
         }
 
+
         composable("tips") {
-            TipsScreen()
+            TipsScreen(
+                selectedTab = "tips",
+                onTabSelected = { navController.navigate(it) },
+                onNotificationsClick = { navController.navigate("notifications") }
+            )
+        }
+
+        composable("notifications") {
+            NotificationsScreen(
+                selectedTab = "notifications",
+                onTabSelected = { navController.navigate(it) }
+            )
         }
     }
 }

@@ -2,6 +2,7 @@ package com.example.safeairapp.ui.screens
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -29,38 +30,61 @@ import com.example.safeairapp.R
 import com.example.safeairapp.ui.theme.Montserrat
 
 @Composable
-fun TipsScreen(notifications: Int = 2) {
+fun TipsScreen(
+    selectedTab: String,
+    onTabSelected: (String) -> Unit,
+    notifications: Int = 2,
+    onNotificationsClick: () -> Unit
+) {
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color.White)
-    ) {
+    Box(modifier = Modifier.fillMaxSize()) {
 
-        TipsHeader(notifications = notifications)
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.White)
+        ) {
 
-        Spacer(modifier = Modifier.height(40.dp))
+            TipsHeader(
+                notifications = notifications,
+                onNotificationsClick = onNotificationsClick
+            )
+
+            Spacer(modifier = Modifier.height(40.dp))
+
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(bottom = 130.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = "Recommendation page\nComing soon...",
+                    fontSize = 22.sp,
+                    color = Color.Gray,
+                    fontFamily = Montserrat,
+                    fontWeight = FontWeight.Medium,
+                    textAlign = TextAlign.Center
+                )
+            }
+        }
 
         Box(
             modifier = Modifier
-                .fillMaxSize()
-                .padding(bottom = 130.dp),
-            contentAlignment = Alignment.Center
+                .align(Alignment.BottomCenter)
+                .padding(bottom = 8.dp)
         ) {
-            Text(
-                text = "Recommendation page\nComing soon...",
-                fontSize = 22.sp,
-                color = Color.Gray,
-                fontFamily = Montserrat,
-                fontWeight = FontWeight.Medium,
-                textAlign = TextAlign.Center
+            BottomNavBar(
+                selected = selectedTab,
+                onTabSelected = onTabSelected
             )
         }
     }
 }
 
+
 @Composable
-fun TipsHeader(notifications: Int) {
+fun TipsHeader(notifications: Int, onNotificationsClick: () -> Unit) {
 
     Box(
         modifier = Modifier
@@ -104,7 +128,9 @@ fun TipsHeader(notifications: Int) {
                     Image(
                         painter = painterResource(R.drawable.notification_w),
                         contentDescription = "Notifications",
-                        modifier = Modifier.size(24.dp)
+                        modifier = Modifier
+                            .size(24.dp)
+                            .clickable { onNotificationsClick() }
                     )
                     
                     if (notifications > 0) {
@@ -155,10 +181,16 @@ fun TipsHeader(notifications: Int) {
             )
         }
     }
+
 }
 
 @Preview(showBackground = true)
 @Composable
 fun PreviewTipsScreen() {
-    TipsScreen(notifications = 2)
+    TipsScreen(
+        selectedTab = "tips",
+        onTabSelected = {},
+        notifications = 2,
+        onNotificationsClick = {}
+    )
 }
