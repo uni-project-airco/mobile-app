@@ -3,12 +3,13 @@ package com.example.safeairapp.ui.screens
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -27,6 +28,7 @@ data class Recommendation(
     val value: Float,
     val level: String,
     val direction: String,
+    val actions: List<String>
 )
 
 val sampleRecommendations = listOf(
@@ -36,7 +38,13 @@ val sampleRecommendations = listOf(
         parameter = "CO₂",
         value = 850f,
         level = "high",
-        direction = "high"
+        direction = "high",
+        actions = listOf(
+            "Open windows to increase airflow",
+            "Turn on ventilation or air purifier",
+            "Avoid crowded rooms",
+            "Reduce physical activity indoors"
+        )
     ),
     Recommendation(
         id = 2,
@@ -44,7 +52,11 @@ val sampleRecommendations = listOf(
         parameter = "Humidity",
         value = 35f,
         level = "medium",
-        direction = "low"
+        direction = "low",
+        actions = listOf(
+            "Use a humidifier",
+            "Place water bowls near heat sources"
+        )
     )
 )
 
@@ -65,28 +77,34 @@ fun TipsScreen(
                 .background(Color.White)
         ) {
 
-            TipsHeader(notifications = notifications, onNotificationsClick = onNotificationsClick)
+            TipsHeader(
+                notifications = notifications,
+                onNotificationsClick = onNotificationsClick
+            )
 
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(20.dp))
 
             Column(modifier = Modifier.padding(horizontal = 24.dp)) {
 
-                ActiveRecommendationsCard(count = sampleRecommendations.size)
+                ActiveRecommendationsCard(
+                    count = sampleRecommendations.size
+                )
 
-                Spacer(modifier = Modifier.height(26.dp))
+                Spacer(modifier = Modifier.height(28.dp))
 
                 Text(
                     text = "Action Required",
                     fontSize = 22.sp,
                     fontFamily = Montserrat,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold,
+                    color = Color.Black
                 )
 
-                Spacer(modifier = Modifier.height(20.dp))
+                Spacer(modifier = Modifier.height(18.dp))
 
                 sampleRecommendations.forEach { rec ->
                     RecommendationCard(rec)
-                    Spacer(modifier = Modifier.height(20.dp))
+                    Spacer(modifier = Modifier.height(22.dp))
                 }
 
                 Spacer(modifier = Modifier.height(140.dp))
@@ -129,21 +147,21 @@ fun TipsHeader(notifications: Int, onNotificationsClick: () -> Unit) {
             ) {
 
                 Image(
-                    painter = painterResource(R.drawable.safeair_logo_w),
-                    contentDescription = "",
+                    painter = painterResource(id = R.drawable.safeair_logo_w),
+                    contentDescription = "Logo",
                     modifier = Modifier.size(40.dp)
                 )
 
-                // Notification icon
                 Box(
                     modifier = Modifier.size(52.dp),
                     contentAlignment = Alignment.Center
                 ) {
                     Image(
-                        painter = painterResource(R.drawable.notification_w),
+                        painter = painterResource(id = R.drawable.notification_w),
                         contentDescription = "Notifications",
                         modifier = Modifier
                             .size(24.dp)
+                            .clickable { onNotificationsClick() }
                     )
                 }
             }
@@ -158,7 +176,7 @@ fun TipsHeader(notifications: Int, onNotificationsClick: () -> Unit) {
                 color = Color.White
             )
 
-            Spacer(modifier = Modifier.height(6.dp))
+            Spacer(modifier = Modifier.height(10.dp))
 
             Text(
                 text = "Personalized tips to improve your air quality",
@@ -179,6 +197,7 @@ fun ActiveRecommendationsCard(count: Int) {
             .background(Color(0xFFF5F5F5), RoundedCornerShape(20.dp))
             .padding(24.dp)
     ) {
+
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
@@ -189,8 +208,9 @@ fun ActiveRecommendationsCard(count: Int) {
                 Text(
                     text = "Active Recommendations",
                     fontSize = 16.sp,
+                    fontFamily = Montserrat,
                     fontWeight = FontWeight.SemiBold,
-                    fontFamily = Montserrat
+                    color = Color.Black
                 )
 
                 Spacer(modifier = Modifier.height(6.dp))
@@ -198,14 +218,15 @@ fun ActiveRecommendationsCard(count: Int) {
                 Text(
                     text = count.toString(),
                     fontSize = 32.sp,
+                    fontFamily = Montserrat,
                     fontWeight = FontWeight.Bold,
-                    fontFamily = Montserrat
+                    color = Color.Black
                 )
             }
 
             Image(
                 painter = painterResource(R.drawable.accept_mark),
-                contentDescription = "",
+                contentDescription = null,
                 modifier = Modifier.size(56.dp)
             )
         }
@@ -214,6 +235,8 @@ fun ActiveRecommendationsCard(count: Int) {
 
 @Composable
 fun RecommendationCard(rec: Recommendation) {
+
+    var expanded by remember { mutableStateOf(false) }
 
     val badgeBackground = when (rec.level) {
         "high" -> Color(0xFFE57373).copy(alpha = 0.25f)
@@ -239,7 +262,8 @@ fun RecommendationCard(rec: Recommendation) {
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.Top
             ) {
 
                 Column(modifier = Modifier.widthIn(max = 220.dp)) {
@@ -249,7 +273,8 @@ fun RecommendationCard(rec: Recommendation) {
                         fontSize = 20.sp,
                         fontFamily = Montserrat,
                         fontWeight = FontWeight.Bold,
-                        maxLines = 2
+                        maxLines = 2,
+                        color = Color.Black
                     )
 
                     Spacer(modifier = Modifier.height(6.dp))
@@ -261,9 +286,10 @@ fun RecommendationCard(rec: Recommendation) {
                     ) {
                         Text(
                             text = rec.parameter,
-                            fontSize = 13.sp,
                             color = Color.Black,
-                            fontFamily = Montserrat
+                            fontFamily = Montserrat,
+                            fontWeight = FontWeight.SemiBold,
+                            fontSize = 13.sp
                         )
                     }
                 }
@@ -286,18 +312,63 @@ fun RecommendationCard(rec: Recommendation) {
             Spacer(modifier = Modifier.height(14.dp))
 
             val description = when (rec.parameter) {
-                "CO₂" -> "Your CO₂ levels are elevated at ${rec.value} ppm. This can cause drowsiness and reduced concentration."
-                "Humidity" -> "Humidity is at ${rec.value}%, which is below the optimal range of 40–60%."
-                else -> "Current ${rec.parameter} level is ${rec.value}."
+                "CO₂" ->
+                    "Your CO₂ levels are elevated at ${rec.value} ppm. This can cause drowsiness and reduced concentration. Immediate action is recommended."
+                "Humidity" ->
+                    "Humidity is at ${rec.value}%, which is below the optimal range of 40–60%. Low humidity can cause dry skin and respiratory discomfort."
+                else ->
+                    "Current ${rec.parameter} level is ${rec.value}."
             }
 
             Text(
                 text = description,
-                fontSize = 15.sp,
                 fontFamily = Montserrat,
+                fontSize = 15.sp,
                 lineHeight = 20.sp,
+                fontWeight = FontWeight.Medium,
                 color = Color.Black
             )
+
+            Spacer(modifier = Modifier.height(14.dp))
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { expanded = !expanded },
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+
+                Text(
+                    text = if (expanded) "Hide recommended actions" else "View recommended actions",
+                    fontFamily = Montserrat,
+                    fontWeight = FontWeight.SemiBold,
+                    fontSize = 16.sp,
+                    color = Color.Black
+                )
+
+                Text(
+                    text = if (expanded) "▲" else "▼",
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.Black
+                )
+            }
+
+            if (expanded) {
+
+                Spacer(modifier = Modifier.height(10.dp))
+
+                rec.actions.forEach {
+                    Text(
+                        text = "▶ $it",
+                        fontSize = 15.sp,
+                        fontFamily = Montserrat,
+                        fontWeight = FontWeight.Medium,
+                        color = Color.Black,
+                        modifier = Modifier.padding(vertical = 3.dp)
+                    )
+                }
+            }
         }
     }
 }
