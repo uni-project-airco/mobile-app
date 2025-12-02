@@ -66,6 +66,15 @@ fun statusColor(status: String): Color =
         else -> Color.Gray
     }
 
+fun statusColorText(status: String): Color =
+    when (status) {
+        "high" -> Color(0xFFBD4A4A)
+        "warning" -> Color(0xFFC7861B)
+        "info" -> Color(0xFF4189C4)
+        "success" -> Color(0xFF4FA852)
+        else -> Color.Gray
+    }
+
 val sampleNotifications = listOf(
     NotificationItem(
         id = 1,
@@ -144,15 +153,15 @@ fun NotificationsScreen(
 ) {
     val context = LocalContext.current
     val pubNubService = remember { PubNubService() }
-    
+
     // Collect PubNub notifications
     val pubNubNotifications by pubNubService.notifications.collectAsState()
-    
+
     // Combine sample notifications with PubNub notifications
-    var allNotifications by remember { 
+    var allNotifications by remember {
         mutableStateOf(sampleNotifications.toMutableList())
     }
-    
+
     // Initialize PubNub when screen is first displayed
     LaunchedEffect(Unit) {
         pubNubService.initialize(
@@ -161,7 +170,7 @@ fun NotificationsScreen(
             channelName = channelName
         )
     }
-    
+
     // Update notifications list when PubNub receives new messages
     LaunchedEffect(pubNubNotifications) {
         val newPubNubItems = pubNubNotifications.map { pubNubData ->
@@ -175,12 +184,12 @@ fun NotificationsScreen(
                 isNew = true
             )
         }
-        
+
         // Merge: PubNub notifications first, then sample notifications
         // Remove duplicates by checking if notification already exists
         val existingIds = allNotifications.map { it.id }.toSet()
         val uniqueNewItems = newPubNubItems.filter { it.id !in existingIds }
-        
+
         if (uniqueNewItems.isNotEmpty()) {
             allNotifications = (uniqueNewItems + allNotifications).toMutableList()
         }
@@ -364,10 +373,10 @@ fun NotificationCard(item: NotificationItem) {
                 ) {
                     Text(
                         text = item.status.replaceFirstChar { it.uppercase() },
-                        color = statusColor(item.status),
+                        color = statusColorText(item.status),
                         fontSize = 13.sp,
                         fontFamily = Montserrat,
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight.Medium
                     )
                 }
             }
