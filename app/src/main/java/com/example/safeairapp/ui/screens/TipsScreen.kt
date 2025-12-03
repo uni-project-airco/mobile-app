@@ -15,6 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -28,7 +29,8 @@ data class Recommendation(
     val value: Float,
     val level: String,
     val direction: String,
-    val actions: List<String>
+    val actions: List<String>,
+    val completed: Boolean = false
 )
 
 val sampleRecommendations = listOf(
@@ -67,6 +69,8 @@ fun TipsScreen(
     notifications: Int = 2,
     onNotificationsClick: () -> Unit
 ) {
+    var activeList by remember { mutableStateOf(sampleRecommendations.toMutableList()) }
+    var completedList by remember { mutableStateOf(mutableListOf<Recommendation>()) }
 
     Box(modifier = Modifier.fillMaxSize()) {
 
@@ -87,7 +91,7 @@ fun TipsScreen(
             Column(modifier = Modifier.padding(horizontal = 24.dp)) {
 
                 ActiveRecommendationsCard(
-                    count = sampleRecommendations.size
+                    count = activeList.size
                 )
 
                 Spacer(modifier = Modifier.height(28.dp))
@@ -102,9 +106,42 @@ fun TipsScreen(
 
                 Spacer(modifier = Modifier.height(18.dp))
 
-                sampleRecommendations.forEach { rec ->
-                    RecommendationCard(rec)
+                activeList.forEach { rec ->
+                    RecommendationCard(
+                        rec = rec,
+                        onCompleted = { completed ->
+                            activeList = activeList.filter { it.id != completed.id }.toMutableList()
+                            completedList = (completedList + completed.copy(completed = true)).toMutableList()
+                        }
+                    )
                     Spacer(modifier = Modifier.height(22.dp))
+                }
+
+                Spacer(modifier = Modifier.height(32.dp))
+
+                Text(
+                    text = "Completed",
+                    fontSize = 22.sp,
+                    fontFamily = Montserrat,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.Black
+                )
+
+                Spacer(modifier = Modifier.height(14.dp))
+
+                if (completedList.isEmpty()) {
+                    Text(
+                        text = "No completed recommendations yet.",
+                        fontSize = 16.sp,
+                        fontFamily = Montserrat,
+                        fontWeight = FontWeight.Medium,
+                        color = Color.Gray
+                    )
+                } else {
+                    completedList.forEach { rec ->
+                        CompletedRecommendationCard(rec)
+                        Spacer(modifier = Modifier.height(18.dp))
+                    }
                 }
 
                 Spacer(modifier = Modifier.height(140.dp))
@@ -156,13 +193,48 @@ fun TipsHeader(notifications: Int, onNotificationsClick: () -> Unit) {
                     modifier = Modifier.size(52.dp),
                     contentAlignment = Alignment.Center
                 ) {
+
+                    Box(
+                        modifier = Modifier
+                            .size(42.dp)
+                            .background(
+                                color = Color.White.copy(alpha = 0.12f),
+                                shape = RoundedCornerShape(50)
+                            )
+                    )
+
                     Image(
-                        painter = painterResource(id = R.drawable.notification_w),
+                        painter = painterResource(R.drawable.notification_w),
                         contentDescription = "Notifications",
                         modifier = Modifier
                             .size(24.dp)
                             .clickable { onNotificationsClick() }
                     )
+
+                    if (notifications > 0) {
+                        Box(
+                            modifier = Modifier
+                                .size(22.dp)
+                                .align(Alignment.TopEnd)
+                                .offset(x = 5.dp, y = (-2).dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .matchParentSize()
+                                    .background(Color.Red, RoundedCornerShape(50))
+                            )
+
+                            Text(
+                                text = notifications.toString(),
+                                color = Color.White,
+                                fontSize = 14.sp,
+                                fontFamily = Montserrat,
+                                fontWeight = FontWeight.Bold,
+                                modifier = Modifier.offset(y = (-1).dp)
+                            )
+                        }
+                    }
                 }
             }
 
@@ -182,6 +254,7 @@ fun TipsHeader(notifications: Int, onNotificationsClick: () -> Unit) {
                 text = "Personalized tips to improve your air quality",
                 fontSize = 16.sp,
                 fontFamily = Montserrat,
+                fontWeight = FontWeight.Normal,
                 color = Color.White.copy(alpha = 0.7f)
             )
         }
@@ -227,14 +300,19 @@ fun ActiveRecommendationsCard(count: Int) {
             Image(
                 painter = painterResource(R.drawable.accept_mark),
                 contentDescription = null,
-                modifier = Modifier.size(56.dp)
+                modifier = Modifier
+                    .size(56.dp)
+                    .align(Alignment.Bottom)
             )
         }
     }
 }
 
 @Composable
-fun RecommendationCard(rec: Recommendation) {
+fun RecommendationCard(
+    rec: Recommendation,
+    onCompleted: (Recommendation) -> Unit
+) {
 
     var expanded by remember { mutableStateOf(false) }
 
@@ -368,7 +446,59 @@ fun RecommendationCard(rec: Recommendation) {
                         modifier = Modifier.padding(vertical = 3.dp)
                     )
                 }
+
+                Spacer(modifier = Modifier.height(20.dp))
+
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(Color.Black, RoundedCornerShape(12.dp))
+                        .clickable { onCompleted(rec) }
+                        .padding(vertical = 10.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "Mark as Completed",
+                        color = Color.White,
+                        fontFamily = Montserrat,
+                        fontWeight = FontWeight.SemiBold,
+                        fontSize = 17.sp
+                    )
+                }
             }
+        }
+    }
+}
+
+@Composable
+fun CompletedRecommendationCard(rec: Recommendation) {
+
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(Color(0xFFF7F7F7), RoundedCornerShape(24.dp))
+            .border(1.dp, Color(0xFFBEBEBE), RoundedCornerShape(24.dp))
+            .padding(24.dp)
+    ) {
+        Column {
+
+            Text(
+                text = rec.title,
+                fontFamily = Montserrat,
+                fontWeight = FontWeight.SemiBold,
+                fontSize = 18.sp,
+                color = Color(0xFF0AA60F)
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Text(
+                text = "Completed",
+                fontSize = 14.sp,
+                fontFamily = Montserrat,
+                fontWeight = FontWeight.Medium,
+                color = Color.DarkGray
+            )
         }
     }
 }
