@@ -2,11 +2,12 @@ package com.example.safeairapp.ui.screens
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -26,6 +27,9 @@ fun HistoryScreen(
     onTabSelected: (String) -> Unit,
     onNotificationsClick: () -> Unit
 ) {
+    var selectedCategory by remember { mutableStateOf("Temp") }
+    var filterExpanded by remember { mutableStateOf(false) }
+    var selectedFilter by remember { mutableStateOf("Last 24h") }
 
     Box(modifier = Modifier.fillMaxSize()) {
 
@@ -40,22 +44,126 @@ fun HistoryScreen(
                 onNotificationsClick = onNotificationsClick
             )
 
+            Spacer(modifier = Modifier.height(20.dp))
+
+            CategorySwitcher(
+                selected = selectedCategory,
+                onSelect = { selectedCategory = it }
+            )
+
+            Spacer(modifier = Modifier.height(30.dp))
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 24.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    val icon = when (selectedCategory) {
+                        "Temp" -> R.drawable.temperature_sensor
+                        "Humidity" -> R.drawable.humidity
+                        "CO₂" -> R.drawable.co2
+                        else -> R.drawable.dust
+                    }
+
+                    Image(
+                        painter = painterResource(icon),
+                        contentDescription = null,
+                        modifier = Modifier.size(24.dp)
+                    )
+
+                    Spacer(modifier = Modifier.width(10.dp))
+
+                    Text(
+                        text = when (selectedCategory) {
+                            "Temp" -> "Temperature"
+                            "Humidity" -> "Humidity"
+                            "CO₂" -> "CO₂"
+                            else -> "Dust"
+                        },
+                        fontFamily = Montserrat,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 22.sp
+                    )
+                }
+
+                Box(
+                    modifier = Modifier
+                        .background(Color.White, RoundedCornerShape(20.dp))
+                        .border(1.dp, Color(0xFFC9C9C9), RoundedCornerShape(20.dp))
+                        .clickable { filterExpanded = !filterExpanded }
+                        .padding(horizontal = 16.dp, vertical = 8.dp)
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(
+                            text = selectedFilter,
+                            fontFamily = Montserrat,
+                            fontWeight = FontWeight.Medium,
+                            fontSize = 14.sp
+                        )
+
+                        Spacer(modifier = Modifier.width(8.dp))
+
+                        Text(
+                            text = if (filterExpanded) "▲" else "▼",
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                }
+            }
+
             Spacer(modifier = Modifier.height(40.dp))
 
+            Text(
+                modifier = Modifier.padding(horizontal = 24.dp),
+                text = when (selectedCategory) {
+                    "Temp" -> "Here you will see historical temperature data."
+                    "Humidity" -> "Here you will see humidity trends over time."
+                    "CO₂" -> "Your CO₂ concentration history will appear here."
+                    else -> "Dust air quality history coming soon."
+                },
+                fontSize = 16.sp,
+                fontFamily = Montserrat,
+                color = Color.Gray,
+                lineHeight = 22.sp
+            )
+
+            Spacer(modifier = Modifier.height(140.dp))
+        }
+
+        if (filterExpanded) {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(bottom = 130.dp),
-                contentAlignment = Alignment.Center
+                    .padding(top = 420.dp, end = 24.dp),
+                contentAlignment = Alignment.TopEnd
             ) {
-                Text(
-                    text = "History page\nComing soon...",
-                    fontSize = 22.sp,
-                    color = Color.Gray,
-                    fontFamily = Montserrat,
-                    fontWeight = FontWeight.Medium,
-                    textAlign = TextAlign.Center
-                )
+                Column(
+                    modifier = Modifier
+                        .width(160.dp)
+                        .background(Color.White, RoundedCornerShape(16.dp))
+                        .border(1.dp, Color(0xFFE0E0E0), RoundedCornerShape(16.dp))
+                        .padding(vertical = 6.dp)
+                ) {
+                    listOf("Last 24h", "7 days", "1 month").forEach { option ->
+                        Text(
+                            text = option,
+                            fontFamily = Montserrat,
+                            fontSize = 15.sp,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable {
+                                    selectedFilter = option
+                                    filterExpanded = false
+                                }
+                                .padding(horizontal = 14.dp, vertical = 10.dp)
+                        )
+                    }
+                }
             }
         }
 
@@ -72,6 +180,44 @@ fun HistoryScreen(
     }
 }
 
+@Composable
+fun CategorySwitcher(
+    selected: String,
+    onSelect: (String) -> Unit
+) {
+    val categories = listOf("Temp", "Humidity", "CO₂", "Dust")
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 24.dp)
+            .background(Color(0xFFF0F0F0), RoundedCornerShape(30.dp))
+            .padding(6.dp),
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        categories.forEach { item ->
+            val isSelected = item == selected
+
+            Box(
+                modifier = Modifier
+                    .background(
+                        if (isSelected) Color.White else Color.Transparent,
+                        RoundedCornerShape(20.dp)
+                    )
+                    .clickable { onSelect(item) }
+                    .padding(horizontal = 14.dp, vertical = 10.dp)
+            ) {
+                Text(
+                    text = item,
+                    fontFamily = Montserrat,
+                    fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+                    fontSize = 16.sp,
+                    color = Color.Black
+                )
+            }
+        }
+    }
+}
 
 @Composable
 fun HistoryHeader(notifications: Int, onNotificationsClick: () -> Unit) {
