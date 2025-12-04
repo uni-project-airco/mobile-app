@@ -55,6 +55,10 @@ dependencies {
     implementation(libs.androidx.foundation)
     implementation(libs.androidx.foundation.layout)
     implementation(libs.androidx.compose.runtime)
+
+    implementation(libs.vico.compose)
+    implementation(libs.vico.compose.m3)
+    
     implementation("com.pubnub:pubnub-kotlin:7.3.2")
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

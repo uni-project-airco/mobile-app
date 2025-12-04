@@ -19,6 +19,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.safeairapp.R
 import com.example.safeairapp.ui.theme.Montserrat
+import com.patrykandpatrick.vico.compose.axis.horizontal.rememberBottomAxis
+import com.patrykandpatrick.vico.compose.axis.vertical.rememberStartAxis
+import com.patrykandpatrick.vico.compose.chart.Chart
+import com.patrykandpatrick.vico.compose.chart.line.lineChart
+import com.patrykandpatrick.vico.core.entry.ChartEntryModelProducer
+import com.patrykandpatrick.vico.core.entry.entryOf
 
 @Composable
 fun HistoryScreen(
@@ -116,7 +122,11 @@ fun HistoryScreen(
                 }
             }
 
-            Spacer(modifier = Modifier.height(40.dp))
+            Spacer(modifier = Modifier.height(20.dp))
+
+            HistoryChart(selectedCategory, selectedFilter)
+
+            Spacer(modifier = Modifier.height(20.dp))
 
             Text(
                 modifier = Modifier.padding(horizontal = 24.dp),
@@ -218,6 +228,55 @@ fun CategorySwitcher(
         }
     }
 }
+
+fun getChartData(category: String, range: String): List<Float> {
+    return when (category) {
+        "Temp" -> when (range) {
+            "Last 24h" -> listOf(20f, 21f, 22f, 23f, 22f, 24f, 25f)
+            "7 days" -> listOf(18f, 19f, 20f, 22f, 21f, 23f, 24f)
+            else -> listOf(17f, 18f, 19f, 20f)
+        }
+
+        "Humidity" -> listOf(40f, 45f, 43f, 47f, 50f)
+        "CO₂" -> listOf(500f, 620f, 580f, 650f, 700f)
+        else -> listOf(10f, 12f, 15f, 13f, 14f)
+    }
+}
+
+@Composable
+fun HistoryChart(category: String, range: String) {
+
+    val data = getChartData(category, range)
+    val entries = data.mapIndexed { index, value -> entryOf(index, value) }
+    val modelProducer = ChartEntryModelProducer(entries)
+
+    val bottomLabels = when (range) {
+        "Last 24h" -> listOf(
+            "00:00", "04:00", "08:00", "12:00", "16:00", "20:00", "24:00"
+        )
+        "7 days" -> listOf("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun")
+        else -> listOf("1w", "2w", "3w", "4w")
+    }
+
+    val bottomAxis = rememberBottomAxis(
+        valueFormatter = { x, _ ->
+            val index = x.toInt()
+            if (index in bottomLabels.indices) bottomLabels[index] else ""
+        }
+    )
+
+    Chart(
+        chart = lineChart(),
+        chartModelProducer = modelProducer,
+        startAxis = rememberStartAxis(),
+        bottomAxis = bottomAxis,
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(250.dp)
+            .padding(horizontal = 24.dp)
+    )
+}
+
 
 @Composable
 fun HistoryHeader(notifications: Int, onNotificationsClick: () -> Unit) {
