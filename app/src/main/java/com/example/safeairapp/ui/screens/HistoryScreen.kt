@@ -60,14 +60,14 @@ fun HistoryScreen(
                 onNotificationsClick = onNotificationsClick
             )
 
-            Spacer(modifier = Modifier.height(20.dp))
+            Spacer(modifier = Modifier.height(30.dp))
 
             CategorySwitcher(
                 selected = selectedCategory,
                 onSelect = { selectedCategory = it }
             )
 
-            Spacer(modifier = Modifier.height(30.dp))
+            Spacer(modifier = Modifier.height(35.dp))
 
             Row(
                 modifier = Modifier
@@ -132,15 +132,15 @@ fun HistoryScreen(
                 }
             }
 
-            Spacer(modifier = Modifier.height(20.dp))
+            Spacer(modifier = Modifier.height(30.dp))
 
             HistoryChart(selectedCategory, selectedFilter)
 
-            Spacer(modifier = Modifier.height(35.dp))
+            Spacer(modifier = Modifier.height(45.dp))
 
             StatsGrid(selectedCategory, selectedFilter)
 
-            Spacer(modifier = Modifier.height(120.dp))
+            Spacer(modifier = Modifier.height(135.dp))
         }
 
         if (filterExpanded) {
@@ -203,7 +203,7 @@ fun StatCard(label: String, value: Float, unit: String, modifier: Modifier = Mod
         modifier = modifier
             .height(150.dp)
             .background(Color.White, RoundedCornerShape(26.dp))
-            .border(1.dp, Color(0xFFE0E0E0), RoundedCornerShape(26.dp))
+            .border(1.dp, Color(0xFFCBCBCB), RoundedCornerShape(26.dp))
             .padding(24.dp)
     ) {
         Column {
