@@ -15,6 +15,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -24,6 +25,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -42,6 +44,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.safeairapp.R
+import com.example.safeairapp.api.ApiClient
+import com.example.safeairapp.api.LoginRequest
+import kotlinx.coroutines.launch
 
 
 @Composable
@@ -53,6 +58,10 @@ fun LoginScreen(modifier: Modifier = Modifier,
 
     var emailError by remember { mutableStateOf("") }
     var passwordError by remember { mutableStateOf("") }
+    var loginError by remember { mutableStateOf("") }
+    var isLoading by remember { mutableStateOf(false) }
+    
+    val coroutineScope = rememberCoroutineScope()
 
     val monsteratt = FontFamily(
         Font(R.font.montserrat_light, FontWeight.Light),
@@ -209,9 +218,23 @@ fun LoginScreen(modifier: Modifier = Modifier,
 
             Spacer(modifier = Modifier.height(28.dp))
 
+            if (loginError.isNotEmpty()) {
+                Text(
+                    text = loginError,
+                    color = Color.Red,
+                    fontSize = 14.sp,
+                    fontFamily = monsteratt,
+                    modifier = Modifier
+                        .padding(bottom = 8.dp)
+                        .fillMaxWidth(),
+                    textAlign = TextAlign.Center
+                )
+            }
+
             Button (
                 onClick = {
                     var hasError = false
+                    loginError = ""
 
                     if (email.isBlank()) {
                         emailError = "Please enter your email"
@@ -224,7 +247,34 @@ fun LoginScreen(modifier: Modifier = Modifier,
                     }
 
                     if (!hasError) {
-                        onSignInClick()
+                        isLoading = true
+                        coroutineScope.launch {
+                            try {
+                                val response = ApiClient.authApiService.login(
+                                    LoginRequest(
+                                        username = email.trim(),
+                                        password = password
+                                    )
+                                )
+                                
+                                if (response.code() == 200 && response.body() != null) {
+                                    val loginResponse = response.body()!!
+                                    if (loginResponse.access_token != null) {
+                                        isLoading = false
+                                        onSignInClick()
+                                    } else {
+                                        isLoading = false
+                                        loginError = "Login failed"
+                                    }
+                                } else {
+                                    isLoading = false
+                                    loginError = response.message() ?: "Login failed. Please try again."
+                                }
+                            } catch (e: Exception) {
+                                isLoading = false
+                                loginError = "Network error: ${e.message ?: "Unable to connect to server"}"
+                            }
+                        }
                     }
 
                 },
@@ -232,15 +282,23 @@ fun LoginScreen(modifier: Modifier = Modifier,
                 shape = RoundedCornerShape(50),
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(55.dp)
+                    .height(55.dp),
+                enabled = !isLoading
             ) {
-                Text(
-                    text = "Sign in",
-                    color = Color.White,
-                    fontFamily = monsteratt,
-                    fontWeight = FontWeight.SemiBold,
-                    fontSize = 22.sp
-                )
+                if (isLoading) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(24.dp),
+                        color = Color.White
+                    )
+                } else {
+                    Text(
+                        text = "Sign in",
+                        color = Color.White,
+                        fontFamily = monsteratt,
+                        fontWeight = FontWeight.SemiBold,
+                        fontSize = 22.sp
+                    )
+                }
             }
 
             Spacer(modifier = Modifier.height(26.dp))

@@ -50,57 +50,21 @@ class PubNubService {
             pubnub?.addListener(object : SubscribeCallback() {
                 override fun message(pubnub: PubNub, message: PNMessageResult) {
                     try {
-                        val messageObj = message.message
-                        var title = "New Notification"
-                        var messageText = "No message content"
-                        var status = "info"
+                        val json = message.message.asJsonObject  // JsonObject
 
-                        // Try to parse as JSON object
-                        when {
-                            messageObj is Map<*, *> -> {
-                                title = (messageObj["title"] as? String)
-                                    ?: (messageObj["Title"] as? String) ?: "New Notification"
-                                messageText = (messageObj["message"] as? String)
-                                    ?: (messageObj["Message"] as? String)
-                                            ?: (messageObj["text"] as? String)
-                                            ?: (messageObj["Text"] as? String)
-                                            ?: messageObj.toString()
-                                status = (messageObj["status"] as? String)
-                                    ?: (messageObj["Status"] as? String) ?: "info"
-                            }
+                        val title = json["title"]?.asString
+                            ?: json["Title"]?.asString
+                            ?: "New Notification"
 
-                            messageObj is String -> {
-                                // Try to parse JSON string
-                                try {
-                                    val jsonString = messageObj
-                                    if (jsonString.startsWith("{") && jsonString.endsWith("}")) {
-                                        // Simple JSON parsing for basic structure
-                                        val titleMatch =
-                                            Regex("\"title\"\\s*:\\s*\"([^\"]+)\"").find(jsonString)
-                                        val messageMatch =
-                                            Regex("\"message\"\\s*:\\s*\"([^\"]+)\"").find(
-                                                jsonString
-                                            )
-                                        val statusMatch =
-                                            Regex("\"status\"\\s*:\\s*\"([^\"]+)\"").find(jsonString)
+                        val messageText = json["message"]?.asString
+                            ?: json["Message"]?.asString
+                            ?: json["text"]?.asString
+                            ?: json["Text"]?.asString
+                            ?: json.toString()
 
-                                        title =
-                                            titleMatch?.groupValues?.get(1) ?: "New Notification"
-                                        messageText =
-                                            messageMatch?.groupValues?.get(1) ?: jsonString
-                                        status = statusMatch?.groupValues?.get(1) ?: "info"
-                                    } else {
-                                        messageText = jsonString
-                                    }
-                                } catch (e: Exception) {
-                                    messageText = messageObj
-                                }
-                            }
-
-                            else -> {
-                                messageText = messageObj?.toString() ?: "No message content"
-                            }
-                        }
+                        val status = json["status"]?.asString
+                            ?: json["Status"]?.asString
+                            ?: "info"
 
                         val notificationData = NotificationData(
                             title = title,
@@ -108,13 +72,9 @@ class PubNubService {
                             status = status,
                             timestamp = System.currentTimeMillis()
                         )
-
-                        // Add to notifications list
                         val currentList = _notifications.value.toMutableList()
-                        currentList.add(0, notificationData) // Add to the beginning
+                        currentList.add(0, notificationData)
                         _notifications.value = currentList
-
-                        Log.d(TAG, "Received notification: $title")
                     } catch (e: Exception) {
                         Log.e(TAG, "Error parsing message: ${e.message}", e)
                         // Fallback: create notification from raw message
@@ -137,7 +97,8 @@ class PubNubService {
                 override fun status(
                     pubnub: PubNub,
                     pnStatus: PNStatus
-                ) {}
+                ) {
+                }
             })
 
             Log.d(TAG, "PubNub initialized and subscribed to channel: $channelName")
