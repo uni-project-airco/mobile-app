@@ -5,7 +5,9 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -26,6 +28,13 @@ import com.patrykandpatrick.vico.compose.chart.line.lineChart
 import com.patrykandpatrick.vico.core.entry.ChartEntryModelProducer
 import com.patrykandpatrick.vico.core.entry.entryOf
 
+data class Stats(
+    val average: Float,
+    val max: Float,
+    val min: Float,
+    val current: Float
+)
+
 @Composable
 fun HistoryScreen(
     notifications: Int = 2,
@@ -42,6 +51,7 @@ fun HistoryScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
+                .verticalScroll(rememberScrollState())
                 .background(Color.White)
         ) {
 
@@ -126,23 +136,11 @@ fun HistoryScreen(
 
             HistoryChart(selectedCategory, selectedFilter)
 
-            Spacer(modifier = Modifier.height(20.dp))
+            Spacer(modifier = Modifier.height(35.dp))
 
-            Text(
-                modifier = Modifier.padding(horizontal = 24.dp),
-                text = when (selectedCategory) {
-                    "Temp" -> "Here you will see historical temperature data."
-                    "Humidity" -> "Here you will see humidity trends over time."
-                    "CO₂" -> "Your CO₂ concentration history will appear here."
-                    else -> "Dust air quality history coming soon."
-                },
-                fontSize = 16.sp,
-                fontFamily = Montserrat,
-                color = Color.Gray,
-                lineHeight = 22.sp
-            )
+            StatsGrid(selectedCategory, selectedFilter)
 
-            Spacer(modifier = Modifier.height(140.dp))
+            Spacer(modifier = Modifier.height(120.dp))
         }
 
         if (filterExpanded) {
@@ -189,6 +187,82 @@ fun HistoryScreen(
         }
     }
 }
+
+fun getStats(data: List<Float>): Stats {
+    return Stats(
+        average = data.average().toFloat(),
+        max = data.maxOrNull() ?: 0f,
+        min = data.minOrNull() ?: 0f,
+        current = data.lastOrNull() ?: 0f
+    )
+}
+
+@Composable
+fun StatCard(label: String, value: Float, unit: String, modifier: Modifier = Modifier) {
+    Box(
+        modifier = modifier
+            .height(150.dp)
+            .background(Color.White, RoundedCornerShape(26.dp))
+            .border(1.dp, Color(0xFFE0E0E0), RoundedCornerShape(26.dp))
+            .padding(24.dp)
+    ) {
+        Column {
+            Text(
+                text = label,
+                fontFamily = Montserrat,
+                fontSize = 20.sp,
+                color = Color.Gray
+            )
+
+            Spacer(modifier = Modifier.height(10.dp))
+
+            Text(
+                text = value.toInt().toString() + " " + unit,
+                fontFamily = Montserrat,
+                fontSize = 32.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color.Black
+            )
+        }
+    }
+}
+
+
+
+@Composable
+fun StatsGrid(category: String, range: String) {
+    val data = getChartData(category, range)
+    val stats = getStats(data)
+
+    val unit = when (category) {
+        "Temp" -> "°C"
+        "Humidity" -> "%"
+        "CO₂" -> "ppm"
+        else -> "µg/m³"
+    }
+
+    Column(modifier = Modifier.padding(horizontal = 24.dp)) {
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            StatCard("Average", stats.average, unit, modifier = Modifier.weight(1f))
+            StatCard("Peak", stats.max, unit, modifier = Modifier.weight(1f))
+        }
+
+        Spacer(modifier = Modifier.height(20.dp))
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            StatCard("Minimum", stats.min, unit, modifier = Modifier.weight(1f))
+            StatCard("Current", stats.current, unit, modifier = Modifier.weight(1f))
+        }
+    }
+}
+
 
 @Composable
 fun CategorySwitcher(
