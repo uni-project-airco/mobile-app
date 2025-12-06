@@ -3,9 +3,8 @@ package com.example.safeairapp.services
 import android.util.Log
 import com.pubnub.api.PubNub
 import com.pubnub.api.UserId
-import com.pubnub.api.models.consumer.pubsub.PNMessageResult
 import com.pubnub.api.v2.PNConfiguration
-import com.pubnub.api.v2.callbacks.EventListener
+import com.example.safeairapp.api.TelemetryData
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -14,6 +13,10 @@ class PubNubService {
     private var pubnub: PubNub? = null
     private val _notifications = MutableStateFlow<List<NotificationData>>(emptyList())
     val notifications: StateFlow<List<NotificationData>> = _notifications.asStateFlow()
+    
+    private val _telemetry = MutableStateFlow<TelemetryData?>(null)
+    val telemetry: StateFlow<TelemetryData?> = _telemetry.asStateFlow()
+    
     private var isInitialized = false
 
     private val TAG = "PubNubService"
@@ -24,6 +27,24 @@ class PubNubService {
         val status: String = "info",
         val timestamp: Long = System.currentTimeMillis()
     )
+    
+    /**
+     * Creates and adds a notification to the list
+     */
+    private fun createNotification(notificationData: NotificationData) {
+        val currentList = _notifications.value.toMutableList()
+        currentList.add(0, notificationData)
+        _notifications.value = currentList
+        Log.d(TAG, "New notification created: ${notificationData.title}")
+    }
+    
+    /**
+     * Updates telemetry data
+     */
+    private fun updateTelemetry(sensorId: String, telemetryData: TelemetryData) {
+        _telemetry.value = telemetryData
+        Log.d(TAG, "Telemetry updated for sensor: $sensorId")
+    }
 
     fun initialize(
         publishKey: String,
@@ -53,57 +74,18 @@ class PubNubService {
             pubnub = PubNub.create(config)
             val subscription = pubnub?.channel(channelName)?.subscription()
 
-            // Add listener for incoming messages
-            subscription?.addListener(object : EventListener {
-
-                override fun message(pubnub: PubNub, result: PNMessageResult) {
-                    try {
-                        Log.d(TAG, "New MSG")
-                        val json = result.message.asJsonObject  // JsonObject
-
-                        val title = json["title"]?.asString
-                            ?: json["Title"]?.asString
-                            ?: "New Notification"
-
-                        val messageText = json["message"]?.asString
-                            ?: json["Message"]?.asString
-                            ?: json["text"]?.asString
-                            ?: json["Text"]?.asString
-                            ?: json.toString()
-
-                        val status = json["status"]?.asString
-                            ?: json["Status"]?.asString
-                            ?: "info"
-
-                        val notificationData = NotificationData(
-                            title = title,
-                            message = messageText,
-                            status = status,
-                            timestamp = System.currentTimeMillis()
-                        )
-
-                        // Update notification list
-                        val currentList = _notifications.value.toMutableList()
-                        currentList.add(0, notificationData)
-                        _notifications.value = currentList
-
-                        Log.d(TAG, "New notification received: $title")
-                    } catch (e: Exception) {
-                        Log.e(TAG, "Error parsing message: ${e.message}", e)
-
-                        val notificationData = NotificationData(
-                            title = "New Notification",
-                            message = result.message.toString(),
-                            status = "info",
-                            timestamp = System.currentTimeMillis()
-                        )
-
-                        val currentList = _notifications.value.toMutableList()
-                        currentList.add(0, notificationData)
-                        _notifications.value = currentList
-                    }
+            // Create listener with callbacks
+            val listener = PubNubMessageListener(
+                onNotificationReceived = { notificationData ->
+                    createNotification(notificationData)
+                },
+                onTelemetryReceived = { sensorId, telemetryData ->
+                    updateTelemetry(sensorId, telemetryData)
                 }
-            })
+            )
+
+            // Add listener for incoming messages
+            subscription?.addListener(listener)
 
            subscription?.subscribe()
 

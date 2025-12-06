@@ -71,36 +71,9 @@ fun statusColorText(status: String): Color =
         else -> Color.Gray
     }
 
-val sampleNotifications = listOf(
+val sampleNotifications: List<NotificationItem> = listOf(
     NotificationItem(
         id = 1,
-        icon = R.drawable.warning,
-        title = "CO₂ Level Elevated",
-        message = "PM2.5 levels are at 45 μg/m³. Avoid outdoor activities.",
-        time = "5 minutes ago",
-        status = "high",
-        isNew = true
-    ),
-    NotificationItem(
-        id = 2,
-        icon = R.drawable.high,
-        title = "PM2.5 Threshold Exceeded",
-        message = "CO₂ concentration reached 850 ppm. Ventilate the room.",
-        time = "2 hours ago",
-        status = "warning",
-        isNew = true
-    ),
-    NotificationItem(
-        id = 3,
-        icon = R.drawable.warning_info,
-        title = "Temperature Change",
-        message = "Temperature has dropped by 3°C.",
-        time = "3 hours ago",
-        status = "info",
-        isNew = false
-    ),
-    NotificationItem(
-        id = 4,
         icon = R.drawable.checkmark,
         title = "Air Quality Improved",
         message = "All parameters returned to optimal levels.",
@@ -138,6 +111,7 @@ fun formatTimeAgo(timestamp: Long): String {
 
 // Counter for generating unique IDs
 private val notificationIdCounter = AtomicInteger(1000)
+
 @Composable
 fun NotificationsScreen(
     selectedTab: String = "notifications",
@@ -146,14 +120,14 @@ fun NotificationsScreen(
     val context = LocalContext.current
     val application = context.applicationContext as SafeAirApplication
     val pubNubService = remember { application.pubNubService }
-    
+
     // Collect PubNub notifications
     val pubNubNotifications by pubNubService.notifications.collectAsState()
-    
+
     var allNotifications by remember {
         mutableStateOf(sampleNotifications.toMutableList())
     }
-    
+
     var processedNotificationKeys by remember {
         mutableStateOf<Set<String>>(emptySet())
     }
@@ -161,7 +135,8 @@ fun NotificationsScreen(
     // Update notifications list when PubNub receives new messages
     LaunchedEffect(pubNubNotifications) {
         val newPubNubItems = pubNubNotifications.mapNotNull { pubNubData ->
-            val notificationKey = "${pubNubData.timestamp}_${pubNubData.title}_${pubNubData.message}"
+            val notificationKey =
+                "${pubNubData.timestamp}_${pubNubData.title}_${pubNubData.message}"
 
             if (notificationKey !in processedNotificationKeys) {
                 val notificationItem = NotificationItem(
@@ -198,7 +173,7 @@ fun NotificationsScreen(
             val newCount = allNotifications.count { it.isNew }
             NotificationsHeader(newCount = newCount)
 
-            LazyColumn (
+            LazyColumn(
                 modifier = Modifier
                     .padding(bottom = 105.dp)
                     .padding(horizontal = 16.dp)
@@ -418,7 +393,6 @@ fun NotificationCard(item: NotificationItem) {
         }
     }
 }
-
 
 
 @Preview(showBackground = true)
