@@ -94,7 +94,7 @@ fun HomeContent(
                 airValue = airQualityValue,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(710.dp)
+                    .height(720.dp)
             )
 
             HeaderBar(
@@ -621,7 +621,7 @@ fun AirQualityHeader(airValue: Float, modifier: Modifier = Modifier) {
 
                 Text(
                     text = getFormattedToday(),
-                    fontSize = 28.sp,
+                    fontSize = 27.sp,
                     fontFamily = Montserrat,
                     fontWeight = FontWeight.Medium,
                     color = Color.Black

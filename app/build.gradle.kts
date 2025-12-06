@@ -55,6 +55,10 @@ dependencies {
     implementation(libs.androidx.foundation)
     implementation(libs.androidx.foundation.layout)
     implementation(libs.androidx.compose.runtime)
+
+    implementation(libs.vico.compose)
+    implementation(libs.vico.compose.m3)
+
     implementation("com.pubnub:pubnub-kotlin:12.0.1")
     implementation("com.squareup.retrofit2:retrofit:2.11.0")
     implementation("com.squareup.retrofit2:converter-gson:2.11.0")

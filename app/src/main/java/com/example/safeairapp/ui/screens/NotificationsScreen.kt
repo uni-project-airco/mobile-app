@@ -62,6 +62,15 @@ fun statusColor(status: String): Color =
         else -> Color.Gray
     }
 
+fun statusColorText(status: String): Color =
+    when (status) {
+        "high" -> Color(0xFFBD4A4A)
+        "warning" -> Color(0xFFC7861B)
+        "info" -> Color(0xFF4189C4)
+        "success" -> Color(0xFF4FA852)
+        else -> Color.Gray
+    }
+
 val sampleNotifications = listOf(
     NotificationItem(
         id = 1,
@@ -148,12 +157,12 @@ fun NotificationsScreen(
     var processedNotificationKeys by remember {
         mutableStateOf<Set<String>>(emptySet())
     }
-    
+
     // Update notifications list when PubNub receives new messages
     LaunchedEffect(pubNubNotifications) {
         val newPubNubItems = pubNubNotifications.mapNotNull { pubNubData ->
             val notificationKey = "${pubNubData.timestamp}_${pubNubData.title}_${pubNubData.message}"
-            
+
             if (notificationKey !in processedNotificationKeys) {
                 val notificationItem = NotificationItem(
                     id = notificationIdCounter.getAndIncrement(),
@@ -164,15 +173,15 @@ fun NotificationsScreen(
                     status = pubNubData.status,
                     isNew = true
                 )
-                
+
                 processedNotificationKeys = processedNotificationKeys + notificationKey
-                
+
                 notificationItem
             } else {
                 null
             }
         }
-        
+
         if (newPubNubItems.isNotEmpty()) {
             allNotifications = (newPubNubItems + allNotifications).toMutableList()
         }
@@ -356,10 +365,10 @@ fun NotificationCard(item: NotificationItem) {
                 ) {
                     Text(
                         text = item.status.replaceFirstChar { it.uppercase() },
-                        color = statusColor(item.status),
+                        color = statusColorText(item.status),
                         fontSize = 13.sp,
                         fontFamily = Montserrat,
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight.Medium
                     )
                 }
             }
