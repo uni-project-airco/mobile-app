@@ -37,7 +37,8 @@ fun AlertThresholdsScreen(
 
             AlertThresholdsHeader(
                 notifications = notifications,
-                onNotificationsClick = onNotificationsClick
+                onNotificationsClick = onNotificationsClick,
+                onBackClick = { onTabSelected("settings") }
             )
 
             Spacer(modifier = Modifier.height(40.dp))
@@ -75,12 +76,12 @@ fun AlertThresholdsScreen(
 @Composable
 fun AlertThresholdsHeader(
     notifications: Int,
-    onNotificationsClick: () -> Unit
+    onNotificationsClick: () -> Unit,
+    onBackClick: () -> Unit
 ) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .height(260.dp)
             .background(
                 color = Color(0xFF1D1D1D),
                 shape = RoundedCornerShape(bottomStart = 30.dp, bottomEnd = 30.dp)
@@ -127,8 +128,7 @@ fun AlertThresholdsHeader(
                         Box(
                             modifier = Modifier
                                 .size(22.dp)
-                                .align(Alignment.TopEnd)
-                                .offset(x = 5.dp, y = (-2).dp),
+                                .align(Alignment.TopEnd),
                             contentAlignment = Alignment.Center
                         ) {
                             Box(
@@ -140,17 +140,24 @@ fun AlertThresholdsHeader(
                             Text(
                                 text = notifications.toString(),
                                 color = Color.White,
-                                fontSize = 14.sp,
-                                fontFamily = Montserrat,
-                                fontWeight = FontWeight.Bold,
-                                modifier = Modifier.offset(y = (-1).dp)
+                                fontSize = 14.sp
                             )
                         }
                     }
                 }
             }
 
-            Spacer(modifier = Modifier.height(40.dp))
+            Spacer(Modifier.height(20.dp))
+
+            Text(
+                text = "◁-  Back to Settings",
+                modifier = Modifier.clickable { onBackClick() },
+                color = Color.White,
+                fontSize = 16.sp,
+                fontFamily = Montserrat
+            )
+
+            Spacer(modifier = Modifier.height(20.dp))
 
             Text(
                 text = "Alert Thresholds",
@@ -172,6 +179,7 @@ fun AlertThresholdsHeader(
         }
     }
 }
+
 
 @Preview(showBackground = true)
 @Composable
