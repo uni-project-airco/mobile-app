@@ -102,7 +102,6 @@ fun SettingsHeader(
                     modifier = Modifier.size(40.dp)
                 )
 
-                // Notification icon + badge
                 Box(
                     modifier = Modifier.size(52.dp),
                     contentAlignment = Alignment.Center

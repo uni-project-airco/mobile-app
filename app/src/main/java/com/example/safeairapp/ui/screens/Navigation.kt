@@ -63,7 +63,5 @@ fun AppNavigation() {
                 onNotificationsClick = { navController.navigate("notifications") }
             )
         }
-
-
     }
 }
