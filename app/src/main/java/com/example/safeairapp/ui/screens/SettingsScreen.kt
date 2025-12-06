@@ -47,6 +47,16 @@ fun SettingsScreen(
 
             Spacer(modifier = Modifier.height(35.dp))
 
+            SectionTitle("Account")
+
+            SettingsItemCard(
+                title = "Personal Information",
+                subtitle = "Manage your profile details",
+                icon = R.drawable.user_s
+            )
+
+            Spacer(modifier = Modifier.height(26.dp))
+
             SectionTitle("Alerts")
 
             SettingsItemCard(
@@ -54,6 +64,26 @@ fun SettingsScreen(
                 subtitle = "Customize warning and danger levels",
                 icon = R.drawable.danger,
                 onClick = onOpenThresholds
+            )
+
+            Spacer(modifier = Modifier.height(26.dp))
+
+            SectionTitle("Device")
+
+            SettingsItemCard(
+                title = "Sensor Management",
+                subtitle = "Assign and manage your sensor",
+                icon = R.drawable.sensor
+            )
+
+            Spacer(modifier = Modifier.height(26.dp))
+
+            SectionTitle("Notifications")
+
+            SettingsItemCard(
+                title = "Notification Preferences",
+                subtitle = "Choose how you want to be notified",
+                icon = R.drawable.notification
             )
 
             Spacer(modifier = Modifier.height(100.dp))
