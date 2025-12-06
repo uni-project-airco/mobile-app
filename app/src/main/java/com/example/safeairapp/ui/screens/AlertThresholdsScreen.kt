@@ -2,6 +2,7 @@ package com.example.safeairapp.ui.screens
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -41,23 +42,12 @@ fun AlertThresholdsScreen(
                 onBackClick = { onTabSelected("settings") }
             )
 
-            Spacer(modifier = Modifier.height(40.dp))
+            Spacer(modifier = Modifier.height(20.dp))
 
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(bottom = 130.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = "Alert Thresholds page\nComing soon...",
-                    fontSize = 22.sp,
-                    color = Color.Gray,
-                    fontFamily = Montserrat,
-                    fontWeight = FontWeight.Medium,
-                    textAlign = TextAlign.Center
-                )
-            }
+            AlertDescriptionCard()
+
+            Spacer(modifier = Modifier.height(20.dp))
+
         }
 
         Box(
@@ -69,6 +59,48 @@ fun AlertThresholdsScreen(
                 selected = selectedTab,
                 onTabSelected = onTabSelected
             )
+        }
+    }
+}
+
+@Composable
+fun AlertDescriptionCard() {
+
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 20.dp)
+            .background(
+                Color(0xFFFFF8EC),
+                RoundedCornerShape(18.dp)
+            )
+            .border(1.dp, Color(0xFFFFB200), RoundedCornerShape(18.dp))
+            .padding(20.dp)
+    ) {
+
+        Column {
+
+            Text("Set custom thresholds using the slider.", fontFamily = Montserrat, fontSize = 16.sp, color = Color(0xFF505050), lineHeight = 22.sp)
+
+            Row {
+                Text("Values ", fontFamily = Montserrat, fontSize = 16.sp, color = Color(0xFF505050), lineHeight = 22.sp)
+                Text("below the warning handle", color = Color(0xFF41A536), fontWeight = FontWeight.SemiBold, fontSize = 16.sp, lineHeight = 22.sp)
+                Text(" are", fontFamily = Montserrat, fontSize = 16.sp, color = Color(0xFF505050), lineHeight = 22.sp)
+            }
+
+            Row {
+                Text("normal, values ", fontFamily = Montserrat, fontSize = 16.sp, color = Color(0xFF505050), lineHeight = 22.sp)
+                Text("between the handles", color = Color(0xFFFF9800), fontWeight = FontWeight.SemiBold, fontSize = 16.sp, lineHeight = 22.sp)
+                Text(" trigger", fontFamily = Montserrat, fontSize = 16.sp, color = Color(0xFF505050), lineHeight = 22.sp)
+            }
+            Row {
+                Text("a warning, and values ", fontFamily = Montserrat,fontSize = 16.sp,color = Color(0xFF505050), lineHeight = 22.sp)
+                Text("above the danger ", color = Color(0xFFE53935), fontWeight = FontWeight.SemiBold, fontSize = 16.sp, lineHeight = 22.sp)
+            }
+            Row {
+                Text("handle", color = Color(0xFFE53935), fontWeight = FontWeight.SemiBold, fontSize = 16.sp, lineHeight = 22.sp)
+                Text(" trigger a danger alert.", fontFamily = Montserrat, fontSize = 16.sp,color = Color(0xFF505050), lineHeight = 22.sp)
+            }
         }
     }
 }
@@ -154,7 +186,8 @@ fun AlertThresholdsHeader(
                 modifier = Modifier.clickable { onBackClick() },
                 color = Color.White,
                 fontSize = 16.sp,
-                fontFamily = Montserrat
+                fontFamily = Montserrat,
+                fontWeight = FontWeight.Medium
             )
 
             Spacer(modifier = Modifier.height(20.dp))
