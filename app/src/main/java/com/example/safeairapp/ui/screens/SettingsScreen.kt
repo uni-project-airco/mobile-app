@@ -55,7 +55,7 @@ fun SettingsScreen(
                 icon = R.drawable.user_s
             )
 
-            Spacer(modifier = Modifier.height(26.dp))
+            Spacer(modifier = Modifier.height(15.dp))
 
             SectionTitle("Alerts")
 
@@ -66,7 +66,7 @@ fun SettingsScreen(
                 onClick = onOpenThresholds
             )
 
-            Spacer(modifier = Modifier.height(26.dp))
+            Spacer(modifier = Modifier.height(15.dp))
 
             SectionTitle("Device")
 
@@ -76,7 +76,7 @@ fun SettingsScreen(
                 icon = R.drawable.sensor
             )
 
-            Spacer(modifier = Modifier.height(26.dp))
+            Spacer(modifier = Modifier.height(15.dp))
 
             SectionTitle("Notifications")
 
@@ -126,8 +126,8 @@ fun SettingsItemCard(
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 24.dp, vertical = 10.dp)
-            .height(100.dp)
+            .padding(horizontal = 24.dp, vertical = 20.dp)
+            .height(120.dp)
             .background(Color.White, RoundedCornerShape(26.dp))
             .border(
                 width = 1.dp,
@@ -135,7 +135,7 @@ fun SettingsItemCard(
                 shape = RoundedCornerShape(26.dp)
             )
             .clickable { onClick() }
-            .padding(horizontal = 22.dp ),
+            .padding(horizontal = 22.dp, vertical = 20.dp ),
         contentAlignment = Alignment.CenterStart
     ) {
 
