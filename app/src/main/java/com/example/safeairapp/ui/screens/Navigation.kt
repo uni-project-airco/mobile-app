@@ -1,7 +1,6 @@
 package com.example.safeairapp.ui.screens
 
 import androidx.compose.runtime.Composable
-import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -16,8 +15,8 @@ fun AppNavigation() {
     ) {
         composable("login") {
             LoginScreen(
-                onSignUpClick = { navController.navigate("register")},
-                onSignInClick = { navController.navigate("home")}
+                onSignUpClick = { navController.navigate("register") },
+                onSignInClick = { navController.navigate("home") }
             )
         }
         composable("register") {
@@ -34,16 +33,13 @@ fun AppNavigation() {
             )
         }
 
-
-
         composable("history") {
             HistoryScreen(
                 selectedTab = "history",
                 onTabSelected = { navController.navigate(it) },
-                onNotificationsClick = { navController.navigate("notifications")}
+                onNotificationsClick = { navController.navigate("notifications") }
             )
         }
-
 
         composable("tips") {
             TipsScreen(

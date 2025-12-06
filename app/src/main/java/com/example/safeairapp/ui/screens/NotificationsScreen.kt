@@ -25,7 +25,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -40,11 +39,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.safeairapp.R
-import com.example.safeairapp.services.PubNubService
+import com.example.safeairapp.SafeAirApplication
 import com.example.safeairapp.ui.theme.Montserrat
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
 import java.util.concurrent.atomic.AtomicInteger
 
 data class NotificationItem(
@@ -135,54 +131,50 @@ fun formatTimeAgo(timestamp: Long): String {
 private val notificationIdCounter = AtomicInteger(1000)
 @Composable
 fun NotificationsScreen(
-    notifications: Int = 5,
     selectedTab: String = "notifications",
-    onTabSelected: (String) -> Unit,
-    publishKey: String = "pub-c-6b19366c-41f5-4c2e-acd2-72584e72cdca",
-    subscribeKey: String = "sub-c-2cfb801c-715b-494b-b401-12764cf0ecfa",
-    channelName: String = "notifications"
+    onTabSelected: (String) -> Unit
 ) {
     val context = LocalContext.current
-    val pubNubService = remember { PubNubService() }
+    val application = context.applicationContext as SafeAirApplication
+    val pubNubService = remember { application.pubNubService }
     
     // Collect PubNub notifications
     val pubNubNotifications by pubNubService.notifications.collectAsState()
     
-    // Combine sample notifications with PubNub notifications
-    var allNotifications by remember { 
+    var allNotifications by remember {
         mutableStateOf(sampleNotifications.toMutableList())
     }
     
-    // Initialize PubNub when screen is first displayed
-    LaunchedEffect(Unit) {
-        pubNubService.initialize(
-            publishKey = publishKey,
-            subscribeKey = subscribeKey,
-            channelName = channelName
-        )
+    var processedNotificationKeys by remember {
+        mutableStateOf<Set<String>>(emptySet())
     }
     
     // Update notifications list when PubNub receives new messages
     LaunchedEffect(pubNubNotifications) {
-        val newPubNubItems = pubNubNotifications.map { pubNubData ->
-            NotificationItem(
-                id = notificationIdCounter.getAndIncrement(),
-                icon = getIconForStatus(pubNubData.status),
-                title = pubNubData.title,
-                message = pubNubData.message,
-                time = formatTimeAgo(pubNubData.timestamp),
-                status = pubNubData.status,
-                isNew = true
-            )
+        val newPubNubItems = pubNubNotifications.mapNotNull { pubNubData ->
+            val notificationKey = "${pubNubData.timestamp}_${pubNubData.title}_${pubNubData.message}"
+            
+            if (notificationKey !in processedNotificationKeys) {
+                val notificationItem = NotificationItem(
+                    id = notificationIdCounter.getAndIncrement(),
+                    icon = getIconForStatus(pubNubData.status),
+                    title = pubNubData.title,
+                    message = pubNubData.message,
+                    time = formatTimeAgo(pubNubData.timestamp),
+                    status = pubNubData.status,
+                    isNew = true
+                )
+                
+                processedNotificationKeys = processedNotificationKeys + notificationKey
+                
+                notificationItem
+            } else {
+                null
+            }
         }
         
-        // Merge: PubNub notifications first, then sample notifications
-        // Remove duplicates by checking if notification already exists
-        val existingIds = allNotifications.map { it.id }.toSet()
-        val uniqueNewItems = newPubNubItems.filter { it.id !in existingIds }
-        
-        if (uniqueNewItems.isNotEmpty()) {
-            allNotifications = (uniqueNewItems + allNotifications).toMutableList()
+        if (newPubNubItems.isNotEmpty()) {
+            allNotifications = (newPubNubItems + allNotifications).toMutableList()
         }
     }
 
@@ -424,7 +416,6 @@ fun NotificationCard(item: NotificationItem) {
 @Composable
 fun PreviewNotificationsScreen() {
     NotificationsScreen(
-        notifications = 5,
         selectedTab = "notifications",
         onTabSelected = {}
     )
