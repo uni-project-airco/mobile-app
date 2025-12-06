@@ -6,7 +6,6 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -24,33 +23,36 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.zIndex
 import com.example.safeairapp.R
+import com.example.safeairapp.SafeAirApplication
+import com.example.safeairapp.api.TelemetryData
 import com.example.safeairapp.ui.theme.Montserrat
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
 @Composable
-fun HomeScreen(selectedTab: String,
-               onTabSelected: (String) -> Unit,
-               airQualityValue: Float = 15f,
-               notifications: Int = 2,
-               onNotificationsClick: () -> Unit) {
+fun HomeScreen(
+    selectedTab: String,
+    onTabSelected: (String) -> Unit,
+    airQualityValue: Float = 15f,
+    notifications: Int = 2,
+    onNotificationsClick: () -> Unit
+) {
 
 
     Box(modifier = Modifier.fillMaxSize()) {
@@ -82,6 +84,12 @@ fun HomeContent(
     onMoreDetailsClick: () -> Unit,
     onNotificationsClick: () -> Unit
 ) {
+    val context = LocalContext.current
+    val application = context.applicationContext as SafeAirApplication
+    val pubNubService = remember { application.pubNubService }
+
+    val telemetry by pubNubService.telemetry.collectAsState()
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -91,7 +99,7 @@ fun HomeContent(
         Box(modifier = Modifier.fillMaxWidth()) {
 
             AirQualityHeader(
-                airValue = airQualityValue,
+                airValue = telemetry?.aqi ?: 0,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(720.dp)
@@ -113,6 +121,7 @@ fun HomeContent(
             Column(modifier = Modifier.padding(24.dp)) {
 
                 SensorsList(
+                    telemetry = telemetry,
                     onMoreDetailsClick = onMoreDetailsClick
                 )
 
@@ -322,11 +331,13 @@ fun SensorCard(
                         modifier = Modifier.size(32.dp)
                     )
                     Spacer(Modifier.width(12.dp))
-                    Text(title,
+                    Text(
+                        title,
                         fontSize = 22.sp,
                         fontFamily = Montserrat,
                         fontWeight = FontWeight.Medium,
-                        color = Color.Black)
+                        color = Color.Black
+                    )
                 }
 
                 Box(
@@ -334,11 +345,13 @@ fun SensorCard(
                         .background(statusColor.copy(alpha = 0.2f), RoundedCornerShape(10.dp))
                         .padding(horizontal = 14.dp, vertical = 6.dp)
                 ) {
-                    Text(status,
+                    Text(
+                        status,
                         color = statusColorText,
                         fontFamily = Montserrat,
                         fontWeight = FontWeight.Medium,
-                        fontSize = 16.sp)
+                        fontSize = 16.sp
+                    )
                 }
             }
 
@@ -381,42 +394,58 @@ fun SensorCard(
 
 
 @Composable
-fun SensorsList(onMoreDetailsClick: () -> Unit) {
+fun SensorsList(
+    telemetry: TelemetryData?,
+    onMoreDetailsClick: () -> Unit
+) {
     Column(verticalArrangement = Arrangement.spacedBy(18.dp)) {
         Spacer(modifier = Modifier.height(10.dp))
+
+        // Temperature
+        val temperature = telemetry?.temperature ?: 22.5
+        val temperatureStatus = getTemperatureStatus(temperature)
         SensorCard(
             icon = R.drawable.temperature_card,
             title = "Temperature",
-            value = "22.5",
+            value = String.format(Locale.US, "%.1f", temperature),
             unit = "°C",
-            status = "Good",
+            status = temperatureStatus,
             onMoreDetailsClick = onMoreDetailsClick
         )
 
+        // Humidity
+        val humidity = telemetry?.humidity ?: 45.0
+        val humidityStatus = getHumidityStatus(humidity)
         SensorCard(
             icon = R.drawable.humidity_card,
             title = "Humidity",
-            value = "45",
+            value = String.format(Locale.US, "%.0f", humidity),
             unit = "%",
-            status = "Warning",
+            status = humidityStatus,
             onMoreDetailsClick = onMoreDetailsClick
         )
 
+        // CO₂ Level
+        val co2Level = telemetry?.co2_level ?: 850.0
+        val co2Status = getCO2Status(co2Level)
         SensorCard(
             icon = R.drawable.co2_card,
             title = "CO₂ Level",
-            value = "850",
+            value = String.format(Locale.US, "%.0f", co2Level),
             unit = "ppm",
-            status = "Warning",
+            status = co2Status,
             onMoreDetailsClick = onMoreDetailsClick
         )
 
+        // Dust (PM2.5)
+        val pm2Level = telemetry?.pm2_level ?: 12.3
+        val pm2Status = getPM2Status(pm2Level)
         SensorCard(
             icon = R.drawable.dust_card,
             title = "Dust",
-            value = "12.3",
+            value = String.format(Locale.US, "%.1f", pm2Level),
             unit = "µg/m³",
-            status = "Good",
+            status = pm2Status,
             onMoreDetailsClick = onMoreDetailsClick
         )
 
@@ -435,44 +464,85 @@ fun SensorsList(onMoreDetailsClick: () -> Unit) {
     }
 }
 
+/**
+ * Helper functions to calculate sensor status based on thresholds
+ */
+fun getTemperatureStatus(temperature: Double): String {
+    return when {
+        temperature < 10.0 || temperature > 30.0 -> "Bad"
+        temperature < 15.0 || temperature > 27.0 -> "Warning"
+        else -> "Good"
+    }
+}
 
-fun getGradientForAirQuality(value: Float): Brush {
+fun getHumidityStatus(humidity: Double): String {
+    return when {
+        humidity < 30.0 || humidity > 60.0 -> "Bad"
+        humidity < 40.0 || humidity > 50.0 -> "Warning"
+        else -> "Good"
+    }
+}
+
+fun getCO2Status(co2Level: Double): String {
+    return when {
+        co2Level > 1000.0 -> "Bad"
+        co2Level > 800.0 -> "Warning"
+        else -> "Good"
+    }
+}
+
+fun getPM2Status(pm2Level: Double): String {
+    return when {
+        pm2Level > 35.0 -> "Bad"
+        pm2Level > 25.0 -> "Warning"
+        else -> "Good"
+    }
+}
+
+
+fun getGradientForAirQuality(value: Int): Brush {
     return when {
         value >= 80f -> Brush.verticalGradient(
-            listOf(Color(0xFF80E4FF), Color(0xFF23CFFF))
+            listOf(Color(0xFFFF8F71), Color(0xFFF53C27))
         )
+
         value >= 60f -> Brush.verticalGradient(
-            listOf(Color(0xFF98F477), Color(0xFF7BF439))
+            listOf(Color(0xFFFFBF71), Color(0xFFFA7121))
         )
+
         value >= 40f -> Brush.verticalGradient(
             listOf(Color(0xFFFFE868), Color(0xFFFFD91C))
         )
+
         value >= 20f -> Brush.verticalGradient(
-            listOf(Color(0xFFFFBF71), Color(0xFFFA7121))
+            listOf(Color(0xFF98F477), Color(0xFF7BF439))
+
         )
+
         else -> Brush.verticalGradient(
-            listOf(Color(0xFFFF8F71), Color(0xFFF53C27))
+
+            listOf(Color(0xFF80E4FF), Color(0xFF23CFFF))
         )
     }
 }
 
-fun getAirQualityText(value: Float): String {
+fun getAirQualityText(value: Int): String {
     return when {
-        value >= 80f -> "Good air\nquality"
-        value >= 60f -> "Air quality\nis fair"
-        value >= 40f -> "Air quality\nis poor"
-        value >= 20f -> "Air quality\nis bad"
-        else -> "Air quality\nis very\nbad"
+        value >= 80f -> "Air quality\nis very\nbad"
+        value >= 60f -> "Air quality\nis poor"
+        value >= 40f -> "Air quality\nis bad"
+        value >= 20f -> "Air quality\nis fair"
+        else -> "Good air\nquality"
     }
 }
 
-fun getAirQualityImage(value: Float): Int {
+fun getAirQualityImage(value: Int): Int {
     return when {
-        value >= 80f -> R.drawable.air_good
-        value >= 60f -> R.drawable.air_fair
+        value >= 80f -> R.drawable.air_very_bad
+        value >= 60f -> R.drawable.air_bad
         value >= 40f -> R.drawable.air_poor
-        value >= 20f -> R.drawable.air_bad
-        else -> R.drawable.air_very_bad
+        value >= 20f -> R.drawable.air_fair
+        else -> R.drawable.air_good
     }
 }
 
@@ -534,7 +604,7 @@ fun IndicatorItem(icon: Int, label: String) {
 
 @Composable
 fun HeaderBar(notifications: Int, onNotificationsClick: () -> Unit, modifier: Modifier = Modifier) {
-    Row (
+    Row(
         modifier = Modifier
             .fillMaxWidth()
             .padding(top = 45.dp, start = 24.dp, end = 24.dp),
@@ -600,8 +670,7 @@ fun HeaderBar(notifications: Int, onNotificationsClick: () -> Unit, modifier: Mo
 }
 
 @Composable
-fun AirQualityHeader(airValue: Float, modifier: Modifier = Modifier) {
-    val qualityText = getAirQualityText(airValue)
+fun AirQualityHeader(airValue: Int, modifier: Modifier = Modifier) {
     val imageRes = getAirQualityImage(airValue)
 
     Box(
@@ -670,7 +739,7 @@ fun AirQualityHeader(airValue: Float, modifier: Modifier = Modifier) {
                             .fillMaxWidth()
                     )
                 }
-                
+
                 Image(
                     painter = painterResource(id = imageRes),
                     contentDescription = "Air quality illustration",

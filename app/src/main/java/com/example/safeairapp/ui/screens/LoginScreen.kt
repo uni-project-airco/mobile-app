@@ -12,12 +12,10 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
@@ -37,15 +35,17 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.safeairapp.R
+import com.example.safeairapp.SafeAirApplication
 import com.example.safeairapp.api.ApiClient
 import com.example.safeairapp.api.LoginRequest
+import com.example.safeairapp.utils.TokenManager
+import androidx.compose.ui.platform.LocalContext
 import kotlinx.coroutines.launch
 
 
@@ -53,6 +53,9 @@ import kotlinx.coroutines.launch
 fun LoginScreen(modifier: Modifier = Modifier,
                 onSignUpClick: () -> Unit = {},
                 onSignInClick: () -> Unit = {}){
+    val context = LocalContext.current
+    val tokenManager = remember { TokenManager.getInstance(context) }
+    
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
 
@@ -63,7 +66,7 @@ fun LoginScreen(modifier: Modifier = Modifier,
     
     val coroutineScope = rememberCoroutineScope()
 
-    val monsteratt = FontFamily(
+    val montserrat = FontFamily(
         Font(R.font.montserrat_light, FontWeight.Light),
         Font(R.font.montserrat, FontWeight.Normal),
         Font(R.font.montserrat_medium, FontWeight.Medium),
@@ -101,7 +104,7 @@ fun LoginScreen(modifier: Modifier = Modifier,
 
             Text(
                 text = "Login",
-                fontFamily = monsteratt,
+                fontFamily = montserrat,
                 fontWeight = FontWeight.Medium,
                 fontSize = 40.sp,
                 modifier = Modifier.fillMaxWidth(),
@@ -115,11 +118,11 @@ fun LoginScreen(modifier: Modifier = Modifier,
                 onValueChange = {
                     email = it
                     emailError = ""
-                                },
+                },
                 placeholder = {
                     Text(
                         "Email...",
-                        fontFamily = monsteratt,
+                        fontFamily = montserrat,
                         fontSize = 18.sp
                     )
                 },
@@ -145,7 +148,7 @@ fun LoginScreen(modifier: Modifier = Modifier,
                 ),
                 shape = RoundedCornerShape(15.dp),
                 textStyle = TextStyle(
-                    fontFamily = monsteratt,
+                    fontFamily = montserrat,
                     fontSize = 18.sp
                 )
             )
@@ -154,7 +157,7 @@ fun LoginScreen(modifier: Modifier = Modifier,
                 text = emailError,
                 color = Color.Red,
                 fontSize = 12.sp,
-                fontFamily = monsteratt,
+                fontFamily = montserrat,
                 modifier = Modifier
                     .padding(start = 2.dp, top = 1.dp)
                     .align(Alignment.Start)
@@ -167,11 +170,11 @@ fun LoginScreen(modifier: Modifier = Modifier,
                 onValueChange = {
                     password = it
                     passwordError = ""
-                                },
+                },
                 placeholder = {
                     Text(
                         "Password...",
-                        fontFamily = monsteratt,
+                        fontFamily = montserrat,
                         fontSize = 18.sp
                     )
                 },
@@ -190,7 +193,7 @@ fun LoginScreen(modifier: Modifier = Modifier,
                 ),
                 shape = RoundedCornerShape(15.dp),
                 textStyle = TextStyle(
-                    fontFamily = monsteratt,
+                    fontFamily = montserrat,
                     fontSize = 18.sp
                 )
             )
@@ -199,7 +202,7 @@ fun LoginScreen(modifier: Modifier = Modifier,
                 text = passwordError,
                 color = Color.Red,
                 fontSize = 12.sp,
-                fontFamily = monsteratt,
+                fontFamily = montserrat,
                 modifier = Modifier
                     .padding(start = 2.dp, top = 1.dp)
                     .align(Alignment.Start)
@@ -209,7 +212,7 @@ fun LoginScreen(modifier: Modifier = Modifier,
 
             Text(
                 text = "Forgot Password?",
-                fontFamily = monsteratt,
+                fontFamily = montserrat,
                 fontWeight = FontWeight.Normal,
                 fontSize = 14.sp,
                 modifier = Modifier.fillMaxWidth(),
@@ -223,7 +226,7 @@ fun LoginScreen(modifier: Modifier = Modifier,
                     text = loginError,
                     color = Color.Red,
                     fontSize = 14.sp,
-                    fontFamily = monsteratt,
+                    fontFamily = montserrat,
                     modifier = Modifier
                         .padding(bottom = 8.dp)
                         .fillMaxWidth(),
@@ -260,6 +263,17 @@ fun LoginScreen(modifier: Modifier = Modifier,
                                 if (response.code() == 200 && response.body() != null) {
                                     val loginResponse = response.body()!!
                                     if (loginResponse.access_token != null) {
+                                        // Save tokens to storage
+                                        tokenManager.saveTokens(
+                                            accessToken = loginResponse.access_token,
+                                            refreshToken = loginResponse.refresh_token,
+                                            sensorToken = loginResponse.sensor_token
+                                        )
+                                        
+                                        // Reinitialize PubNub with sensor token
+                                        val application = context.applicationContext as SafeAirApplication
+                                        application.initializePubNub()
+                                        
                                         isLoading = false
                                         onSignInClick()
                                     } else {
@@ -294,7 +308,7 @@ fun LoginScreen(modifier: Modifier = Modifier,
                     Text(
                         text = "Sign in",
                         color = Color.White,
-                        fontFamily = monsteratt,
+                        fontFamily = montserrat,
                         fontWeight = FontWeight.SemiBold,
                         fontSize = 22.sp
                     )
@@ -304,8 +318,8 @@ fun LoginScreen(modifier: Modifier = Modifier,
             Spacer(modifier = Modifier.height(26.dp))
 
             Text(
-                text = "Don’t have an account? Sign up",
-                fontFamily = monsteratt,
+                text = "Don't have an account? Sign up",
+                fontFamily = montserrat,
                 fontWeight = FontWeight.Normal,
                 fontSize = 16.sp,
                 modifier = Modifier
