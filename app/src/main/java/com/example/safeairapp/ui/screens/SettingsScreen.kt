@@ -159,7 +159,7 @@ fun SettingsItemCard(
                 )
             }
 
-            Spacer(Modifier.width(24.dp))
+            Spacer(Modifier.width(16.dp))
 
             Column(
                 verticalArrangement = Arrangement.Center

@@ -66,7 +66,11 @@ fun AppNavigation() {
         }
 
         composable("thresholds") {
-            AlertThresholdsScreen()
+            AlertThresholdsScreen(
+                onTabSelected = { navController.navigate(it) },
+                onNotificationsClick = { navController.navigate("notifications") }
+            )
         }
+
     }
 }
