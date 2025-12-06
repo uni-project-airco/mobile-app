@@ -59,5 +59,15 @@ fun AppNavigation() {
                 onTabSelected = { navController.navigate(it) }
             )
         }
+
+        composable("settings") {
+            SettingsScreen(
+                selectedTab = "settings",
+                onTabSelected = { navController.navigate(it) },
+                onNotificationsClick = { navController.navigate("notifications") }
+            )
+        }
+
+
     }
 }
