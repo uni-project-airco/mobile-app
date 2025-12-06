@@ -10,3 +10,8 @@ data class LoginResponse(
     val access_token: String? = null,
     val refresh_token: String? = null,
 )
+
+data class HistoryResponse(
+    val day: List<HistoricalData> ?= null,
+    val week: List<HistoricalData> ?= null
+)
