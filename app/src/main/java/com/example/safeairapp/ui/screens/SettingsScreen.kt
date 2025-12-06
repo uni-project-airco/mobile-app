@@ -2,6 +2,7 @@ package com.example.safeairapp.ui.screens
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -18,13 +19,16 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.safeairapp.R
 import com.example.safeairapp.ui.theme.Montserrat
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.rememberScrollState
 
 @Composable
 fun SettingsScreen(
     selectedTab: String = "settings",
     notifications: Int = 2,
     onTabSelected: (String) -> Unit,
-    onNotificationsClick: () -> Unit
+    onNotificationsClick: () -> Unit,
+    onOpenThresholds: () -> Unit
 ) {
 
     Box(modifier = Modifier.fillMaxSize()) {
@@ -33,6 +37,7 @@ fun SettingsScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .background(Color.White)
+                .verticalScroll(rememberScrollState())
         ) {
 
             SettingsHeader(
@@ -40,23 +45,18 @@ fun SettingsScreen(
                 onNotificationsClick = onNotificationsClick
             )
 
-            Spacer(modifier = Modifier.height(40.dp))
+            Spacer(modifier = Modifier.height(35.dp))
 
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(bottom = 130.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = "Settings page\nComing soon...",
-                    fontSize = 22.sp,
-                    color = Color.Gray,
-                    fontFamily = Montserrat,
-                    fontWeight = FontWeight.Medium,
-                    textAlign = TextAlign.Center
-                )
-            }
+            SectionTitle("Alerts")
+
+            SettingsItemCard(
+                title = "Customise thresholds",
+                subtitle = "Customize warning and danger levels",
+                icon = R.drawable.danger,
+                onClick = onOpenThresholds
+            )
+
+            Spacer(modifier = Modifier.height(100.dp))
         }
 
         Box(
@@ -69,6 +69,100 @@ fun SettingsScreen(
                 onTabSelected = onTabSelected
             )
         }
+    }
+}
+
+@Composable
+fun SectionTitle(text: String) {
+    Text(
+        text = text,
+        color = Color.Black,
+        fontSize = 22.sp,
+        fontWeight = FontWeight.Bold,
+        fontFamily = Montserrat,
+        modifier = Modifier.padding(horizontal = 24.dp)
+    )
+}
+
+
+@Composable
+fun SettingsItemCard(
+    title: String,
+    subtitle: String,
+    icon: Int,
+    onClick: () -> Unit = {}
+) {
+
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 24.dp, vertical = 10.dp)
+            .height(100.dp)
+            .background(Color.White, RoundedCornerShape(26.dp))
+            .border(
+                width = 1.dp,
+                color = Color(0xFFCBCBCB),
+                shape = RoundedCornerShape(26.dp)
+            )
+            .clickable { onClick() }
+            .padding(horizontal = 22.dp ),
+        contentAlignment = Alignment.CenterStart
+    ) {
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.Top
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(40.dp)
+                    .background(
+                        Color(0xFF919191).copy(alpha = 0.5f),
+                        RoundedCornerShape(50)
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+                Image(
+                    painter = painterResource(icon),
+                    contentDescription = null,
+                    modifier = Modifier.size(22.dp)
+                )
+            }
+
+            Spacer(Modifier.width(24.dp))
+
+            Column(
+                verticalArrangement = Arrangement.Center
+            ) {
+                Text(
+                    text = title,
+                    fontSize = 18.sp,
+                    fontFamily = Montserrat,
+                    fontWeight = FontWeight.SemiBold,
+                    color = Color.Black
+                )
+
+                Spacer(modifier = Modifier.height(6.dp))
+
+                Text(
+                    text = subtitle,
+                    fontSize = 14.sp,
+                    fontFamily = Montserrat,
+                    fontWeight = FontWeight.Medium,
+                    color = Color.Gray,
+                    maxLines = 2,
+                    softWrap = true,
+                    modifier = Modifier.width(160.dp)
+                )
+            }
+        }
+
+        Text(
+            text = ">",
+            fontSize = 32.sp,
+            color = Color(0xFF000000),
+            modifier = Modifier.align(Alignment.CenterEnd)
+        )
     }
 }
 
@@ -180,6 +274,7 @@ fun PreviewSettingsScreen() {
         selectedTab = "settings",
         notifications = 3,
         onTabSelected = {},
-        onNotificationsClick = {}
+        onNotificationsClick = {},
+        onOpenThresholds = {}
     )
 }
