@@ -226,6 +226,35 @@ fun AlertSliderCard(
                 }
             }
 
+            Spacer(Modifier.height(18.dp))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Dot(color = Color(0xFFFF9800))
+                    Spacer(Modifier.width(4.dp))
+                    Text(
+                        text = "Warning ${range.start.toInt()}$unitLabel",
+                        fontFamily = Montserrat,
+                        fontSize = 14.sp,
+                        color = Color(0xFF1D1D1D)
+                    )
+                }
+
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Dot(color = Color(0xFFE53935))
+                    Spacer(Modifier.width(4.dp))
+                    Text(
+                        text = "Danger ${range.endInclusive.toInt()}$unitLabel",
+                        fontFamily = Montserrat,
+                        fontSize = 14.sp,
+                        color = Color(0xFFE53935)
+                    )
+                }
+            }
+
             Spacer(Modifier.height(12.dp))
 
             RangeSlider(
@@ -256,8 +285,18 @@ fun AlertSliderCard(
                     color = Color(0xFF808080)
                 )
             }
+
         }
     }
+}
+
+@Composable
+private fun Dot(color: Color) {
+    Box(
+        modifier = Modifier
+            .size(10.dp)
+            .background(color, RoundedCornerShape(50))
+    )
 }
 
 
