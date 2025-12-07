@@ -31,23 +31,28 @@ import com.example.safeairapp.R
 import com.example.safeairapp.SafeAirApplication
 import com.example.safeairapp.ui.theme.Montserrat
 import android.util.Log
+import androidx.compose.runtime.MutableState
 
 @Composable
 fun AlertThresholdsScreen(
     selectedTab: String = "settings",
     notifications: Int = 2,
     onTabSelected: (String) -> Unit,
-    onNotificationsClick: () -> Unit
+    onNotificationsClick: () -> Unit,
+    temperatureRange: MutableState<ClosedFloatingPointRange<Float>>,
+    humidityRange: MutableState<ClosedFloatingPointRange<Float>>,
+    co2Range: MutableState<ClosedFloatingPointRange<Float>>,
+    pm25Range: MutableState<ClosedFloatingPointRange<Float>>
 ) {
     val context = LocalContext.current
     val application = context.applicationContext as SafeAirApplication
     val pubNubService = remember { application.pubNubService }
     
     // Track threshold values for each sensor
-    var temperatureRange by remember { mutableStateOf(28f..35f) }
-    var humidityRange by remember { mutableStateOf(65f..80f) }
-    var co2Range by remember { mutableStateOf(800f..1100f) }
-    var pm25Range by remember { mutableStateOf(35f..55f) }
+//    var temperatureRange by remember { mutableStateOf(28f..35f) }
+//    var humidityRange by remember { mutableStateOf(65f..80f) }
+//    var co2Range by remember { mutableStateOf(800f..1100f) }
+//    var pm25Range by remember { mutableStateOf(35f..55f) }
 
     Box(modifier = Modifier.fillMaxSize()) {
 
@@ -80,8 +85,8 @@ fun AlertThresholdsScreen(
                 unitLabel = "°C",
                 initialWarning = 28f,
                 initialDanger = 35f,
-                value = temperatureRange,
-                onValueChange = { temperatureRange = it }
+                value = temperatureRange.value,
+                onValueChange = { temperatureRange.value = it }
             )
 
             Spacer(modifier = Modifier.height(8.dp))
@@ -95,8 +100,8 @@ fun AlertThresholdsScreen(
                 unitLabel = "%",
                 initialWarning = 65f,
                 initialDanger = 80f,
-                value = humidityRange,
-                onValueChange = { humidityRange = it }
+                value = humidityRange.value,
+                onValueChange = { humidityRange.value = it }
             )
 
             Spacer(modifier = Modifier.height(8.dp))
@@ -110,8 +115,8 @@ fun AlertThresholdsScreen(
                 unitLabel = "ppm",
                 initialWarning = 800f,
                 initialDanger = 1100f,
-                value = co2Range,
-                onValueChange = { co2Range = it }
+                value = co2Range.value,
+                onValueChange = { co2Range.value = it }
             )
 
             Spacer(modifier = Modifier.height(8.dp))
@@ -125,8 +130,8 @@ fun AlertThresholdsScreen(
                 unitLabel = "µg/m³",
                 initialWarning = 35f,
                 initialDanger = 55f,
-                value = pm25Range,
-                onValueChange = { pm25Range = it }
+                value = pm25Range.value,
+                onValueChange = { pm25Range.value = it }
             )
 
             Spacer(modifier = Modifier.height(30.dp))
@@ -138,10 +143,10 @@ fun AlertThresholdsScreen(
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 ResetButton(onClick = {
-                    temperatureRange = 28f..35f
-                    humidityRange = 65f..80f
-                    co2Range = 800f..1100f
-                    pm25Range = 35f..55f
+                    temperatureRange.value = 28f..35f
+                    humidityRange.value = 65f..80f
+                    co2Range.value = 800f..1100f
+                    pm25Range.value = 35f..55f
                 })
 
                 Spacer(modifier = Modifier.width(12.dp))
@@ -154,20 +159,20 @@ fun AlertThresholdsScreen(
                         "request_type" to "change_thresholds_level",
                         "thresholds" to mapOf(
                             "co2" to mapOf(
-                                "warning" to co2Range.start.toInt(),
-                                "danger" to co2Range.endInclusive.toInt()
+                                "warning" to co2Range.value.start.toInt(),
+                                "danger" to co2Range.value.endInclusive.toInt()
                             ),
                             "temperature" to mapOf(
-                                "warning" to temperatureRange.start.toInt(),
-                                "danger" to temperatureRange.endInclusive.toInt()
+                                "warning" to temperatureRange.value.start.toInt(),
+                                "danger" to temperatureRange.value.endInclusive.toInt()
                             ),
                             "humidity" to mapOf(
-                                "warning" to humidityRange.start.toInt(),
-                                "danger" to humidityRange.endInclusive.toInt()
+                                "warning" to humidityRange.value.start.toInt(),
+                                "danger" to humidityRange.value.endInclusive.toInt()
                             ),
                             "pm25" to mapOf(
-                                "warning" to pm25Range.start.toInt(),
-                                "danger" to pm25Range.endInclusive.toInt()
+                                "warning" to pm25Range.value.start.toInt(),
+                                "danger" to pm25Range.value.endInclusive.toInt()
                             )
                         )
                     )
@@ -667,6 +672,10 @@ fun PreviewAlertThresholdsScreen() {
         selectedTab = "settings",
         notifications = 3,
         onTabSelected = {},
-        onNotificationsClick = {}
+        onNotificationsClick = {},
+        temperatureRange = remember { mutableStateOf(28f..35f) },
+        humidityRange = remember { mutableStateOf(65f..80f) },
+        co2Range = remember { mutableStateOf(800f..1100f) },
+        pm25Range = remember { mutableStateOf(35f..55f) }
     )
 }

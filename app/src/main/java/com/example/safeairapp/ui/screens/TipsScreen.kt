@@ -100,10 +100,13 @@ fun TipsScreen(
     selectedTab: String,
     onTabSelected: (String) -> Unit,
     notifications: Int = 2,
-    onNotificationsClick: () -> Unit
+    onNotificationsClick: () -> Unit,
+    activeList: MutableList<Recommendation>,
+    completedList: MutableList<Recommendation>,
+    processedRecommendationKeys: MutableList<String>
 ) {
-    var activeList by remember { mutableStateOf(sampleRecommendations.toMutableList()) }
-    var completedList by remember { mutableStateOf(mutableListOf<Recommendation>()) }
+//    var activeList by remember { mutableStateOf(sampleRecommendations.toMutableList()) }
+//    var completedList by remember { mutableStateOf(mutableListOf<Recommendation>()) }
 
     val context = LocalContext.current
     val application = context.applicationContext as SafeAirApplication
@@ -111,9 +114,9 @@ fun TipsScreen(
 
     // Collect PubNub notifications
     val pubNubRecommendations by pubNubService.notifications.collectAsState()
-    var processedRecommendationKeys by remember {
-        mutableStateOf<Set<String>>(emptySet())
-    }
+//    var processedRecommendationKeys by remember {
+//        mutableStateOf<Set<String>>(emptySet())
+//    }
 
     LaunchedEffect(pubNubRecommendations) {
         val newPubNubItems = pubNubRecommendations.mapNotNull { pubNubData ->
@@ -123,17 +126,13 @@ fun TipsScreen(
             val level = pubNubData.status
             Log.d("STATUS", level)
             if ((level == "high" || level == "warning") && recommendationKey !in processedRecommendationKeys) {
+                processedRecommendationKeys.add(recommendationKey)
                 val recommendationItem = generateRecommendation(pubNubData)
-
-                processedRecommendationKeys = processedRecommendationKeys + recommendationKey
-
                 recommendationItem
-            } else {
-                null
-            }
+            } else null
         }
         if (newPubNubItems.isNotEmpty()) {
-            activeList = (newPubNubItems + activeList).toMutableList()
+            activeList.addAll(0, newPubNubItems)
         }
     }
 
@@ -175,8 +174,8 @@ fun TipsScreen(
                     RecommendationCard(
                         rec = rec,
                         onCompleted = { completed ->
-                            activeList = activeList.filter { it.id != completed.id }.toMutableList()
-                            completedList = (completedList + completed.copy(completed = true)).toMutableList()
+                            activeList.removeIf { it.id == completed.id }
+                            completedList.add(0, completed.copy(completed = true))
                         }
                     )
                     Spacer(modifier = Modifier.height(22.dp))
@@ -575,6 +574,9 @@ fun PreviewTipsScreen() {
         selectedTab = "tips",
         onTabSelected = {},
         notifications = 2,
-        onNotificationsClick = {}
+        onNotificationsClick = {} ,
+        activeList = mutableListOf(),
+        completedList = mutableListOf(),
+        processedRecommendationKeys = mutableListOf()
     )
 }
