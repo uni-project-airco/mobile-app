@@ -108,6 +108,24 @@ fun AlertThresholdsScreen(
                 initialDanger = 55f
             )
 
+            Spacer(modifier = Modifier.height(30.dp))
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 20.dp),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                ResetButton(onClick = {
+                    //
+                })
+
+                Spacer(modifier = Modifier.width(12.dp))
+
+                SaveButton(onClick = {
+                    //
+                })
+            }
             Spacer(modifier = Modifier.height(80.dp))
         }
 
@@ -322,6 +340,55 @@ private fun LegendItem(text: String, color: Color) {
         )
     }
 }
+@Composable
+fun ResetButton(
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit
+) {
+    Box(
+        modifier = modifier
+            .height(50.dp)
+            .background(Color(0xFFF7F7F7), RoundedCornerShape(14.dp))
+            .border(2.dp, Color.Black, RoundedCornerShape(14.dp))
+            .clickable { onClick() }
+            .padding(horizontal = 14.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            text = "Reset to Default",
+            fontFamily = Montserrat,
+            fontSize = 18.sp,
+            fontWeight = FontWeight.SemiBold,
+            color = Color.Black
+        )
+    }
+}
+
+
+@Composable
+fun SaveButton(
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit
+) {
+    Box(
+        modifier = modifier
+            .height(50.dp)
+            .background(Color.Black, RoundedCornerShape(14.dp))
+            .clickable { onClick() }
+            .padding(horizontal = 16.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            text = "Save Changes",
+            fontFamily = Montserrat,
+            fontSize = 18.sp,
+            fontWeight = FontWeight.SemiBold,
+            color = Color.White
+        )
+    }
+}
+
+
 
 
 @Composable
