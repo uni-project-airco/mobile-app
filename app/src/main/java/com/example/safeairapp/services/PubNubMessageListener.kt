@@ -40,7 +40,8 @@ class PubNubMessageListener(
                 title = "New Notification",
                 message = result.message.toString(),
                 status = "info",
-                timestamp = System.currentTimeMillis()
+                timestamp = System.currentTimeMillis(),
+                value = 0
             )
             onNotificationReceived(notificationData)
         }
@@ -61,11 +62,15 @@ class PubNubMessageListener(
             ?: json["Status"]?.asString
             ?: "info"
 
+        val value = json["value"]?.asInt
+            ?: json["Value"]?.asInt
+            ?: 0
         val notificationData = PubNubService.NotificationData(
             title = title,
             message = messageText,
             status = status,
-            timestamp = System.currentTimeMillis()
+            timestamp = System.currentTimeMillis(),
+            value = value
         )
 
         onNotificationReceived(notificationData)
@@ -107,4 +112,5 @@ class PubNubMessageListener(
         }
     }
 }
+
 
