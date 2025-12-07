@@ -1,5 +1,6 @@
 package com.example.safeairapp.ui.screens
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -38,57 +39,30 @@ data class Recommendation(
     val completed: Boolean = false
 )
 
-val sampleRecommendations = listOf(
-    Recommendation(
-        id = 1,
-        title = "Improve Ventilation",
-        parameter = "CO₂",
-        value = 850f,
-        level = "high",
-        direction = "high",
-        actions = listOf(
-            "Open windows to increase airflow",
-            "Turn on ventilation or air purifier",
-            "Avoid crowded rooms",
-            "Reduce physical activity indoors"
-        )
-    ),
-    Recommendation(
-        id = 2,
-        title = "Increase Humidity Levels",
-        parameter = "Humidity",
-        value = 35f,
-        level = "medium",
-        direction = "low",
-        actions = listOf(
-            "Use a humidifier",
-            "Place water bowls near heat sources"
-        )
-    )
-)
-private val titleMap = mapOf("CO2" to "Improve Ventilation", "Humidity" to "Optimize Moisture Control",
-    "Temperature" to "Adjust Heating/Cooling", "PM2.5" to "Enhance Air Filtration")
+val sampleRecommendations = emptyList<Recommendation>()
+private val titleMap = mapOf("co2" to "Improve Ventilation", "humidity" to "Optimize Moisture Control",
+    "temperature" to "Adjust Heating/Cooling", "pm25" to "Enhance Air Filtration")
 
 private val actionsMap = mapOf(
-    "Temperature" to listOf(
+    "temperature" to listOf(
         "Lower thermostat or turn on cooling",
         "Increase airflow with fans or ventilation",
         "Close blinds/curtains to reduce heat gain",
         "Avoid using heat-producing appliances"
     ),
-    "Humidity" to listOf(
+    "humidity" to listOf(
         "Turn on a dehumidifier",
         "Increase ventilation in wet areas",
         "Fix leaks or remove standing water",
         "Avoid drying clothes indoors"
     ),
-    "CO2" to listOf(
+    "co2" to listOf(
         "Open windows for fresh air",
         "Turn on mechanical ventilation",
         "Reduce room occupancy",
         "Take breaks outdoors to lower accumulated CO₂"
     ),
-    "PM2.5" to listOf(
+    "pm25" to listOf(
         "Turn on an air purifier with a HEPA filter",
         "Keep windows closed during outdoor pollution events",
         "Avoid smoking, candles, or frying indoors",
@@ -101,7 +75,7 @@ private val recommendationsIdCounter = AtomicInteger(1000)
 private fun generateRecommendation(data: PubNubService.NotificationData): Recommendation {
     val indicator = data.message.split(' ')[0]
     val title = titleMap[indicator]
-    val value = 0.0f
+    val value = data.value.toFloat()
     val level = data.status
 
     val actions = when(level) {
@@ -144,10 +118,11 @@ fun TipsScreen(
     LaunchedEffect(pubNubRecommendations) {
         val newPubNubItems = pubNubRecommendations.mapNotNull { pubNubData ->
             val recommendationKey =
-                "${pubNubData.timestamp}_${pubNubData.title}_${pubNubData.message}"
+                "${pubNubData.timestamp}_${pubNubData.title}_${pubNubData.message}_R"
 
             val level = pubNubData.status
-            if ((level == "high" || level == "medium") && recommendationKey !in processedRecommendationKeys) {
+            Log.d("STATUS", level)
+            if ((level == "high" || level == "warning") && recommendationKey !in processedRecommendationKeys) {
                 val recommendationItem = generateRecommendation(pubNubData)
 
                 processedRecommendationKeys = processedRecommendationKeys + recommendationKey
