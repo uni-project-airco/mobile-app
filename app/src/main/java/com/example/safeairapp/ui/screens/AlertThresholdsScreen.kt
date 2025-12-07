@@ -18,6 +18,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -56,7 +57,11 @@ fun AlertThresholdsScreen(
 
             AlertDescriptionCard()
 
-            Spacer(modifier = Modifier.height(20.dp))
+            Spacer(modifier = Modifier.height(30.dp))
+
+            BuzzerAlertCard()
+
+            Spacer(modifier = Modifier.height(30.dp))
 
             AlertSliderCard(
                 title = "Temperature",
@@ -185,6 +190,97 @@ fun AlertDescriptionCard() {
                 Text("danger handle", color = Color(0xFFE53935), fontWeight = FontWeight.SemiBold, fontSize = 16.sp, lineHeight = 22.sp)
                 Text(" trigger a danger alert.", fontFamily = Montserrat, fontSize = 16.sp,color = Color(0xFF505050), lineHeight = 22.sp)
             }
+        }
+    }
+}
+
+@Composable
+fun BuzzerAlertCard() {
+
+    var enabled by remember { mutableStateOf(true) }
+
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 20.dp)
+            .background(
+                Color.White,
+                RoundedCornerShape(18.dp)
+            )
+            .border(
+                width = 1.dp,
+                color = Color(0xFFE0E0E0),
+                shape = RoundedCornerShape(18.dp)
+            )
+            .padding(18.dp)
+    ) {
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+
+            Row(
+                modifier = Modifier.weight(1f),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+
+                Box(
+                    modifier = Modifier
+                        .size(44.dp)
+                        .background(Color(0xFFDDE6FF), RoundedCornerShape(50))
+                        .padding(10.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Image(
+                        painter = painterResource(id = R.drawable.volume),
+                        contentDescription = "Buzzer"
+                    )
+                }
+
+                Spacer(modifier = Modifier.width(14.dp))
+
+                Column(
+                    modifier = Modifier.weight(1f)
+                ) {
+
+                    Text(
+                        text = "Buzzer Alerts",
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        color = Color(0xFF1D1D1D),
+                        fontFamily = Montserrat,
+                    )
+
+                    Spacer(modifier = Modifier.height(3.dp))
+
+                    Text(
+                        text = if (enabled)
+                            "Enabled – Buzzer will activate when thresholds are exceeded"
+                        else
+                            "Disabled – Buzzer will stay silent",
+                        fontSize = 14.sp,
+                        color = Color(0xFF656565),
+                        fontFamily = Montserrat,
+                        fontWeight = FontWeight.Normal,
+                        lineHeight = 18.sp,
+                        maxLines = 3
+                    )
+                }
+            }
+
+            androidx.compose.material3.Switch(
+                checked = enabled,
+                onCheckedChange = { enabled = it },
+                modifier = Modifier.scale(0.8f),
+                colors = androidx.compose.material3.SwitchDefaults.colors(
+                    checkedThumbColor = Color.White,
+                    checkedTrackColor = Color.Black,
+                    uncheckedThumbColor = Color.White,
+                    uncheckedTrackColor = Color.Black.copy(alpha = 0.4f)
+                )
+            )
         }
     }
 }
