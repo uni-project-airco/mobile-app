@@ -515,13 +515,13 @@ fun getGradientForAirQuality(value: Int): Brush {
         )
 
         value >= 20f -> Brush.verticalGradient(
-            listOf(Color(0xFF98F477), Color(0xFF7BF439))
+            listOf(Color(0xFFF4EC77), Color(0xFF9EC745))
 
         )
 
         else -> Brush.verticalGradient(
 
-            listOf(Color(0xFF80E4FF), Color(0xFF23CFFF))
+            listOf(Color(0xFF82E7FF), Color(0xFF0BC3F6))
         )
     }
 }
