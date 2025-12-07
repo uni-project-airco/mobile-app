@@ -5,9 +5,17 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.RangeSlider
+import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -34,6 +42,8 @@ fun AlertThresholdsScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .background(Color.White)
+                .padding(bottom = 80.dp)
+                .verticalScroll(rememberScrollState())
         ) {
 
             AlertThresholdsHeader(
@@ -48,6 +58,18 @@ fun AlertThresholdsScreen(
 
             Spacer(modifier = Modifier.height(20.dp))
 
+            AlertSliderCard(
+                title = "Temperature",
+                iconRes = R.drawable.temperature,
+                iconBg = Color(0xFFFFE1C2),
+                minValue = 0f,
+                maxValue = 50f,
+                unitLabel = "°C",
+                initialWarning = 28f,
+                initialDanger = 35f
+            )
+
+            Spacer(modifier = Modifier.height(80.dp))
         }
 
         Box(
@@ -91,19 +113,114 @@ fun AlertDescriptionCard() {
             Row {
                 Text("normal, values ", fontFamily = Montserrat, fontSize = 16.sp, color = Color(0xFF505050), lineHeight = 22.sp)
                 Text("between the handles", color = Color(0xFFFF9800), fontWeight = FontWeight.SemiBold, fontSize = 16.sp, lineHeight = 22.sp)
-                Text(" trigger", fontFamily = Montserrat, fontSize = 16.sp, color = Color(0xFF505050), lineHeight = 22.sp)
+
             }
             Row {
-                Text("a warning, and values ", fontFamily = Montserrat,fontSize = 16.sp,color = Color(0xFF505050), lineHeight = 22.sp)
-                Text("above the danger ", color = Color(0xFFE53935), fontWeight = FontWeight.SemiBold, fontSize = 16.sp, lineHeight = 22.sp)
+                Text("trigger a warning, and values ", fontFamily = Montserrat,fontSize = 16.sp,color = Color(0xFF505050), lineHeight = 22.sp)
+                Text("above the ", color = Color(0xFFE53935), fontWeight = FontWeight.SemiBold, fontSize = 16.sp, lineHeight = 22.sp)
             }
             Row {
-                Text("handle", color = Color(0xFFE53935), fontWeight = FontWeight.SemiBold, fontSize = 16.sp, lineHeight = 22.sp)
+                Text("danger handle", color = Color(0xFFE53935), fontWeight = FontWeight.SemiBold, fontSize = 16.sp, lineHeight = 22.sp)
                 Text(" trigger a danger alert.", fontFamily = Montserrat, fontSize = 16.sp,color = Color(0xFF505050), lineHeight = 22.sp)
             }
         }
     }
 }
+
+@Composable
+fun AlertSliderCard(
+    title: String,
+    iconRes: Int,
+    iconBg: Color,
+    minValue: Float,
+    maxValue: Float,
+    unitLabel: String,
+    initialWarning: Float,
+    initialDanger: Float
+) {
+    var range by remember { mutableStateOf(initialWarning..initialDanger) }
+
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 20.dp, vertical = 8.dp)
+            .background(Color.White, RoundedCornerShape(24.dp))
+            .border(1.dp, Color(0xFFE0E0E0), RoundedCornerShape(24.dp))
+            .padding(20.dp)
+    ) {
+        Column {
+
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(48.dp)
+                        .background(iconBg, RoundedCornerShape(50))
+                ) {
+                    Image(
+                        painter = painterResource(id = iconRes),
+                        contentDescription = title,
+                        modifier = Modifier
+                            .size(24.dp)
+                            .align(Alignment.Center)
+                    )
+                }
+
+                Spacer(Modifier.width(12.dp))
+
+                Column {
+                    Text(
+                        text = title,
+                        fontFamily = Montserrat,
+                        fontWeight = FontWeight.SemiBold,
+                        fontSize = 20.sp,
+                        color = Color(0xFF1D1D1D)
+                    )
+
+                    Text(
+                        text = "Warning: ${range.start.toInt()}$unitLabel • Danger: ${range.endInclusive.toInt()}$unitLabel",
+                        fontFamily = Montserrat,
+                        fontSize = 14.sp,
+                        color = Color(0xFF808080)
+                    )
+                }
+            }
+
+            Spacer(Modifier.height(12.dp))
+
+            RangeSlider(
+                value = range,
+                onValueChange = { range = it },
+                valueRange = minValue..maxValue,
+                colors = SliderDefaults.colors(
+                    thumbColor = Color(0xFFFF9B00),
+                    activeTrackColor = Color(0xFFFF9C0A),
+                    inactiveTrackColor = Color(0xFFE0E0E0),
+                )
+            )
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(
+                    text = "${minValue.toInt()}$unitLabel",
+                    fontFamily = Montserrat,
+                    fontSize = 14.sp,
+                    color = Color(0xFF808080)
+                )
+                Text(
+                    text = "${maxValue.toInt()}$unitLabel",
+                    fontFamily = Montserrat,
+                    fontSize = 14.sp,
+                    color = Color(0xFF808080)
+                )
+            }
+        }
+    }
+}
+
 
 @Composable
 fun AlertThresholdsHeader(
