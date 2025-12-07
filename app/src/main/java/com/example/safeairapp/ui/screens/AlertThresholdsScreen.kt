@@ -69,6 +69,45 @@ fun AlertThresholdsScreen(
                 initialDanger = 35f
             )
 
+            Spacer(modifier = Modifier.height(8.dp))
+
+            AlertSliderCard(
+                title = "Humidity",
+                iconRes = R.drawable.humidity,
+                iconBg = Color(0xFFE5E5FF),
+                minValue = 0f,
+                maxValue = 100f,
+                unitLabel = "%",
+                initialWarning = 65f,
+                initialDanger = 80f
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            AlertSliderCard(
+                title = "CO₂",
+                iconRes = R.drawable.co2,
+                iconBg = Color(0xFFEDE5FF),
+                minValue = 400f,
+                maxValue = 2000f,
+                unitLabel = "ppm",
+                initialWarning = 800f,
+                initialDanger = 1100f
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            AlertSliderCard(
+                title = "PM2.5",
+                iconRes = R.drawable.dust,
+                iconBg = Color(0xFFE5F6C5),
+                minValue = 0f,
+                maxValue = 100f,
+                unitLabel = "µg/m³",
+                initialWarning = 35f,
+                initialDanger = 55f
+            )
+
             Spacer(modifier = Modifier.height(80.dp))
         }
 
