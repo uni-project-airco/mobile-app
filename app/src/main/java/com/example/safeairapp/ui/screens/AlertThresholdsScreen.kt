@@ -286,6 +286,16 @@ fun AlertSliderCard(
                 )
             }
 
+            Spacer(Modifier.height(16.dp))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                LegendItem("Normal", Color(0xFF41A536))
+                LegendItem("Warning", Color(0xFFFF9800))
+                LegendItem("Danger", Color(0xFFE53935))
+            }
         }
     }
 }
@@ -297,6 +307,20 @@ private fun Dot(color: Color) {
             .size(10.dp)
             .background(color, RoundedCornerShape(50))
     )
+}
+
+@Composable
+private fun LegendItem(text: String, color: Color) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Dot(color = color)
+        Spacer(Modifier.width(4.dp))
+        Text(
+            text = text,
+            fontFamily = Montserrat,
+            fontSize = 14.sp,
+            color = Color(0xFF505050)
+        )
+    }
 }
 
 
