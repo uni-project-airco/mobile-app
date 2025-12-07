@@ -26,6 +26,6 @@ object ApiClient {
         .addConverterFactory(GsonConverterFactory.create())
         .build()
 
-    val authApiService: AuthApiService = retrofit.create(AuthApiService::class.java)
+    val apiServices: ApiServices = retrofit.create(ApiServices::class.java)
 }
 

@@ -11,3 +11,8 @@ data class LoginResponse(
     val refresh_token: String? = null,
     val sensor_token: String? = null
 )
+
+data class HistoryResponse(
+    val day: List<HistoricalData> ?= null,
+    val week: List<HistoricalData> ?= null
+)

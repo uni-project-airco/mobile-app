@@ -253,7 +253,7 @@ fun LoginScreen(modifier: Modifier = Modifier,
                         isLoading = true
                         coroutineScope.launch {
                             try {
-                                val response = ApiClient.authApiService.login(
+                                val response = ApiClient.apiServices.login(
                                     LoginRequest(
                                         username = email.trim(),
                                         password = password

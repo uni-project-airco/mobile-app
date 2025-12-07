@@ -1,5 +1,6 @@
 package com.example.safeairapp.ui.screens
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -27,6 +28,9 @@ import com.patrykandpatrick.vico.compose.chart.Chart
 import com.patrykandpatrick.vico.compose.chart.line.lineChart
 import com.patrykandpatrick.vico.core.entry.ChartEntryModelProducer
 import com.patrykandpatrick.vico.core.entry.entryOf
+import com.example.safeairapp.api.ApiClient
+import com.example.safeairapp.api.HistoricalData
+
 
 data class Stats(
     val average: Float,
@@ -34,6 +38,28 @@ data class Stats(
     val min: Float,
     val current: Float
 )
+
+var daysTelemetry: List<HistoricalData> ?= null
+var weekTelemetry: List<HistoricalData> ?= null
+
+suspend fun fetchTelemetry() {
+    try {
+        val response = ApiClient.apiServices.getHistoricalData()
+
+        if (response.code() == 200 && response.body() != null){
+            daysTelemetry = response.body()?.day
+            weekTelemetry = response.body()?.week
+        }
+        else {
+            Log.d("fetchTelemetry", response.code().toString() + ": " + response.message())
+        }
+    } catch (e: Exception) {
+        Log.d(
+            "fetchTelemetry Exception Caught:",
+            "Network error: ${e.message ?: "Unable to connect to server"}"
+        )
+    }
+}
 
 @Composable
 fun HistoryScreen(
@@ -45,6 +71,10 @@ fun HistoryScreen(
     var selectedCategory by remember { mutableStateOf("Temp") }
     var filterExpanded by remember { mutableStateOf(false) }
     var selectedFilter by remember { mutableStateOf("Last 24h") }
+
+    LaunchedEffect(selectedFilter) {
+        fetchTelemetry()
+    }
 
     Box(modifier = Modifier.fillMaxSize()) {
 
@@ -303,18 +333,31 @@ fun CategorySwitcher(
     }
 }
 
-fun getChartData(category: String, range: String): List<Float> {
+fun getValue(category: String, item: HistoricalData): Float {
     return when (category) {
-        "Temp" -> when (range) {
-            "Last 24h" -> listOf(20f, 21f, 22f, 23f, 22f, 24f, 25f)
-            "7 days" -> listOf(18f, 19f, 20f, 22f, 21f, 23f, 24f)
-            else -> listOf(17f, 18f, 19f, 20f)
-        }
-
-        "Humidity" -> listOf(40f, 45f, 43f, 47f, 50f)
-        "CO₂" -> listOf(500f, 620f, 580f, 650f, 700f)
-        else -> listOf(10f, 12f, 15f, 13f, 14f)
+        "Temp" -> item.avg_temperature?.toFloat() as Float
+        "Humidity" -> item.avg_humidity?.toFloat() as Float
+        "CO₂" -> item.avg_co2?.toFloat() as Float
+        else -> item.avg_pm25?.toFloat() as Float
     }
+}
+
+fun getChartData(category: String, range: String): List<Float> {
+    val source = when (range) {
+        "Last 24h" -> daysTelemetry
+        "7 days" -> weekTelemetry
+        else -> null
+    } ?: return emptyList()
+
+    return source.map { getValue(category, it) }
+}
+
+fun getHour(time: String?): String? {
+    return time?.split(":")[0]
+}
+
+fun getTimeRanges(): List<String> {
+    return daysTelemetry?.map { it -> getHour(it.updated_at?.split("T")[1])+ ":00" } ?: emptyList()
 }
 
 @Composable
@@ -325,9 +368,7 @@ fun HistoryChart(category: String, range: String) {
     val modelProducer = ChartEntryModelProducer(entries)
 
     val bottomLabels = when (range) {
-        "Last 24h" -> listOf(
-            "00:00", "04:00", "08:00", "12:00", "16:00", "20:00", "24:00"
-        )
+        "Last 24h" -> getTimeRanges()
         "7 days" -> listOf("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun")
         else -> listOf("1w", "2w", "3w", "4w")
     }
