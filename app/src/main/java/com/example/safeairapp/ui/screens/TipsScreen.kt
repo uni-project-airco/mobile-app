@@ -13,6 +13,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -20,7 +21,11 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.safeairapp.R
+import com.example.safeairapp.SafeAirApplication
+import com.example.safeairapp.services.PubNubService
 import com.example.safeairapp.ui.theme.Montserrat
+import java.util.concurrent.atomic.AtomicInteger
+import kotlin.String
 
 data class Recommendation(
     val id: Int,
@@ -61,7 +66,61 @@ val sampleRecommendations = listOf(
         )
     )
 )
+private val titleMap = mapOf("CO2" to "Improve Ventilation", "Humidity" to "Optimize Moisture Control",
+    "Temperature" to "Adjust Heating/Cooling", "PM2.5" to "Enhance Air Filtration")
 
+private val actionsMap = mapOf(
+    "Temperature" to listOf(
+        "Lower thermostat or turn on cooling",
+        "Increase airflow with fans or ventilation",
+        "Close blinds/curtains to reduce heat gain",
+        "Avoid using heat-producing appliances"
+    ),
+    "Humidity" to listOf(
+        "Turn on a dehumidifier",
+        "Increase ventilation in wet areas",
+        "Fix leaks or remove standing water",
+        "Avoid drying clothes indoors"
+    ),
+    "CO2" to listOf(
+        "Open windows for fresh air",
+        "Turn on mechanical ventilation",
+        "Reduce room occupancy",
+        "Take breaks outdoors to lower accumulated CO₂"
+    ),
+    "PM2.5" to listOf(
+        "Turn on an air purifier with a HEPA filter",
+        "Keep windows closed during outdoor pollution events",
+        "Avoid smoking, candles, or frying indoors",
+        "Clean surfaces and vacuum with a particle filter"
+    )
+)
+
+private val recommendationsIdCounter = AtomicInteger(1000)
+
+private fun generateRecommendation(data: PubNubService.NotificationData): Recommendation {
+    val indicator = data.message.split(' ')[0]
+    val title = titleMap[indicator]
+    val value = 0.0f
+    val level = data.status
+
+    val actions = when(level) {
+        "high" -> actionsMap[indicator]
+        else -> actionsMap[indicator]?.slice(0..1)
+    }
+
+    return Recommendation(
+        id = recommendationsIdCounter.getAndIncrement(),
+        title = title ?: "",
+        parameter = indicator,
+        value = value,
+        level = level,
+        direction = "high",
+        actions = actions ?: emptyList(),
+        completed = false
+    )
+
+}
 @Composable
 fun TipsScreen(
     selectedTab: String,
@@ -71,6 +130,37 @@ fun TipsScreen(
 ) {
     var activeList by remember { mutableStateOf(sampleRecommendations.toMutableList()) }
     var completedList by remember { mutableStateOf(mutableListOf<Recommendation>()) }
+
+    val context = LocalContext.current
+    val application = context.applicationContext as SafeAirApplication
+    val pubNubService = remember { application.pubNubService }
+
+    // Collect PubNub notifications
+    val pubNubRecommendations by pubNubService.notifications.collectAsState()
+    var processedRecommendationKeys by remember {
+        mutableStateOf<Set<String>>(emptySet())
+    }
+
+    LaunchedEffect(pubNubRecommendations) {
+        val newPubNubItems = pubNubRecommendations.mapNotNull { pubNubData ->
+            val recommendationKey =
+                "${pubNubData.timestamp}_${pubNubData.title}_${pubNubData.message}"
+
+            val level = pubNubData.status
+            if ((level == "high" || level == "medium") && recommendationKey !in processedRecommendationKeys) {
+                val recommendationItem = generateRecommendation(pubNubData)
+
+                processedRecommendationKeys = processedRecommendationKeys + recommendationKey
+
+                recommendationItem
+            } else {
+                null
+            }
+        }
+        if (newPubNubItems.isNotEmpty()) {
+            activeList = (newPubNubItems + activeList).toMutableList()
+        }
+    }
 
     Box(modifier = Modifier.fillMaxSize()) {
 
