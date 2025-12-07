@@ -126,7 +126,12 @@ fun AlertThresholdsScreen(
                     //
                 })
             }
-            Spacer(modifier = Modifier.height(80.dp))
+
+            Spacer(modifier = Modifier.height(40.dp))
+
+            RecommendedValuesCard()
+
+            Spacer(modifier = Modifier.height(70.dp))
         }
 
         Box(
@@ -388,8 +393,98 @@ fun SaveButton(
     }
 }
 
+@Composable
+fun RecommendedValuesCard() {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 20.dp)
+            .background(Color.White, RoundedCornerShape(24.dp))
+            .border(1.dp, Color(0xFFE0E0E0), RoundedCornerShape(24.dp))
+            .padding(20.dp)
+    ) {
+
+        Column {
+
+            Text(
+                text = "Recommended Values",
+                fontFamily = Montserrat,
+                fontWeight = FontWeight.Bold,
+                fontSize = 20.sp,
+                color = Color(0xFF1D1D1D)
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
 
 
+            Text(
+                text = "Temperature:",
+                fontFamily = Montserrat,
+                fontWeight = FontWeight.SemiBold,
+                color = Color.Black,
+                fontSize = 18.sp
+            )
+            Text(
+                text = "Warning: 35µg/m³, Danger: 55µg/m³",
+                fontFamily = Montserrat,
+                fontWeight = FontWeight.Medium,
+                color = Color(0xFF666666),
+                fontSize = 17.sp
+            )
+
+            Spacer(modifier = Modifier.height(10.dp))
+
+
+            Text(
+                text = "Humidity:",
+                fontFamily = Montserrat,
+                fontWeight = FontWeight.SemiBold,
+                fontSize = 18.sp
+            )
+            Text(
+                text = "Warning at 65%, Danger at 80%",
+                fontFamily = Montserrat,
+                fontWeight = FontWeight.Medium,
+                color = Color(0xFF666666),
+                fontSize = 17.sp
+            )
+
+            Spacer(modifier = Modifier.height(10.dp))
+
+
+            Text(
+                text = "CO₂:",
+                fontFamily = Montserrat,
+                fontWeight = FontWeight.SemiBold,
+                fontSize = 18.sp
+            )
+            Text(
+                text = "Warning at 800ppm, Danger at 1100ppm",
+                fontFamily = Montserrat,
+                fontWeight = FontWeight.Medium,
+                color = Color(0xFF666666),
+                fontSize = 17.sp
+            )
+
+            Spacer(modifier = Modifier.height(10.dp))
+
+
+            Text(
+                text = "PM2.5:",
+                fontFamily = Montserrat,
+                fontWeight = FontWeight.SemiBold,
+                fontSize = 18.sp
+            )
+            Text(
+                text = "Warning at 35µg/m³, Danger at 55µg/m³",
+                fontFamily = Montserrat,
+                fontWeight = FontWeight.Medium,
+                color = Color(0xFF666666),
+                fontSize = 17.sp
+            )
+        }
+    }
+}
 
 @Composable
 fun AlertThresholdsHeader(
