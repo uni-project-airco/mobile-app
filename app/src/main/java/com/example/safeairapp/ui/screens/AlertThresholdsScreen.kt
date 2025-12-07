@@ -12,6 +12,7 @@ import androidx.compose.material3.RangeSlider
 import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -25,8 +26,11 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.platform.LocalContext
 import com.example.safeairapp.R
+import com.example.safeairapp.SafeAirApplication
 import com.example.safeairapp.ui.theme.Montserrat
+import android.util.Log
 
 @Composable
 fun AlertThresholdsScreen(
@@ -35,6 +39,15 @@ fun AlertThresholdsScreen(
     onTabSelected: (String) -> Unit,
     onNotificationsClick: () -> Unit
 ) {
+    val context = LocalContext.current
+    val application = context.applicationContext as SafeAirApplication
+    val pubNubService = remember { application.pubNubService }
+    
+    // Track threshold values for each sensor
+    var temperatureRange by remember { mutableStateOf(28f..35f) }
+    var humidityRange by remember { mutableStateOf(65f..80f) }
+    var co2Range by remember { mutableStateOf(800f..1100f) }
+    var pm25Range by remember { mutableStateOf(35f..55f) }
 
     Box(modifier = Modifier.fillMaxSize()) {
 
@@ -66,7 +79,9 @@ fun AlertThresholdsScreen(
                 maxValue = 50f,
                 unitLabel = "°C",
                 initialWarning = 28f,
-                initialDanger = 35f
+                initialDanger = 35f,
+                value = temperatureRange,
+                onValueChange = { temperatureRange = it }
             )
 
             Spacer(modifier = Modifier.height(8.dp))
@@ -79,7 +94,9 @@ fun AlertThresholdsScreen(
                 maxValue = 100f,
                 unitLabel = "%",
                 initialWarning = 65f,
-                initialDanger = 80f
+                initialDanger = 80f,
+                value = humidityRange,
+                onValueChange = { humidityRange = it }
             )
 
             Spacer(modifier = Modifier.height(8.dp))
@@ -92,7 +109,9 @@ fun AlertThresholdsScreen(
                 maxValue = 2000f,
                 unitLabel = "ppm",
                 initialWarning = 800f,
-                initialDanger = 1100f
+                initialDanger = 1100f,
+                value = co2Range,
+                onValueChange = { co2Range = it }
             )
 
             Spacer(modifier = Modifier.height(8.dp))
@@ -105,7 +124,9 @@ fun AlertThresholdsScreen(
                 maxValue = 100f,
                 unitLabel = "µg/m³",
                 initialWarning = 35f,
-                initialDanger = 55f
+                initialDanger = 55f,
+                value = pm25Range,
+                onValueChange = { pm25Range = it }
             )
 
             Spacer(modifier = Modifier.height(30.dp))
@@ -117,13 +138,47 @@ fun AlertThresholdsScreen(
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 ResetButton(onClick = {
-                    //
+                    temperatureRange = 28f..35f
+                    humidityRange = 65f..80f
+                    co2Range = 800f..1100f
+                    pm25Range = 35f..55f
                 })
 
                 Spacer(modifier = Modifier.width(12.dp))
 
                 SaveButton(onClick = {
-                    //
+                    val channelName = pubNubService.getCurrentChannelName() 
+                        ?: "sensor_0271a7bf-b4d6-4f74-95d9-4b83f80d2808_5eb81cf8-d129-11f0-86d2-4a0ab95da33d"
+                    
+                    val message = mapOf(
+                        "request_type" to "change_thresholds_level",
+                        "thresholds" to mapOf(
+                            "co2" to mapOf(
+                                "warning" to co2Range.start.toInt(),
+                                "danger" to co2Range.endInclusive.toInt()
+                            ),
+                            "temperature" to mapOf(
+                                "warning" to temperatureRange.start.toInt(),
+                                "danger" to temperatureRange.endInclusive.toInt()
+                            ),
+                            "humidity" to mapOf(
+                                "warning" to humidityRange.start.toInt(),
+                                "danger" to humidityRange.endInclusive.toInt()
+                            ),
+                            "pm25" to mapOf(
+                                "warning" to pm25Range.start.toInt(),
+                                "danger" to pm25Range.endInclusive.toInt()
+                            )
+                        )
+                    )
+                    
+                    pubNubService.publish(channelName, message) { success, error ->
+                        if (success) {
+                            Log.d("AlertThresholdsScreen", "Thresholds published successfully")
+                        } else {
+                            Log.e("AlertThresholdsScreen", "Failed to publish thresholds: $error")
+                        }
+                    }
                 })
             }
 
@@ -198,9 +253,16 @@ fun AlertSliderCard(
     maxValue: Float,
     unitLabel: String,
     initialWarning: Float,
-    initialDanger: Float
+    initialDanger: Float,
+    value: ClosedFloatingPointRange<Float> = initialWarning..initialDanger,
+    onValueChange: (ClosedFloatingPointRange<Float>) -> Unit = {}
 ) {
-    var range by remember { mutableStateOf(initialWarning..initialDanger) }
+    var range by remember { mutableStateOf(value) }
+    
+    // Update local state when external value changes
+    LaunchedEffect(value) {
+        range = value
+    }
 
     Box(
         modifier = Modifier
@@ -282,7 +344,10 @@ fun AlertSliderCard(
 
             RangeSlider(
                 value = range,
-                onValueChange = { range = it },
+                onValueChange = { 
+                    range = it
+                    onValueChange(it)
+                },
                 valueRange = minValue..maxValue,
                 colors = SliderDefaults.colors(
                     thumbColor = Color(0xFFFF9B00),
