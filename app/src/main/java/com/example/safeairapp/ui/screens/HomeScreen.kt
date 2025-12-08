@@ -52,7 +52,6 @@ fun HomeScreen(
     selectedTab: String,
     onTabSelected: (String) -> Unit,
     airQualityValue: Float = 15f,
-    notifications: Int = 2,
     onNotificationsClick: () -> Unit,
     temperatureRange: MutableState<ClosedFloatingPointRange<Float>>,
     humidityRange: MutableState<ClosedFloatingPointRange<Float>>,
@@ -65,7 +64,6 @@ fun HomeScreen(
 
         HomeContent(
             airQualityValue = airQualityValue,
-            notifications = notifications,
             onMoreDetailsClick = { onTabSelected("history") },
             onNotificationsClick = onNotificationsClick,
             temperatureRange = temperatureRange,
@@ -90,7 +88,6 @@ fun HomeScreen(
 @Composable
 fun HomeContent(
     airQualityValue: Float,
-    notifications: Int,
     onMoreDetailsClick: () -> Unit,
     onNotificationsClick: () -> Unit,
     temperatureRange: MutableState<ClosedFloatingPointRange<Float>>,
@@ -103,6 +100,8 @@ fun HomeContent(
     val pubNubService = remember { application.pubNubService }
 
     val telemetry by pubNubService.telemetry.collectAsState()
+    val notificationsList by pubNubService.notifications.collectAsState()
+    val notificationCount = notificationsList.size
 
     Column(
         modifier = Modifier
@@ -120,7 +119,7 @@ fun HomeContent(
             )
 
             HeaderBar(
-                notifications = notifications,
+                notifications = notificationCount,
                 onNotificationsClick = onNotificationsClick
             )
         }
@@ -795,7 +794,6 @@ fun PreviewVeryBad() {
         selectedTab = "home",
         onTabSelected = {},
         airQualityValue = 10f,
-        notifications = 2,
         onNotificationsClick = {},
         temperatureRange = remember { mutableStateOf(28f..35f) },
         humidityRange = remember { mutableStateOf(65f..80f) },
@@ -811,7 +809,6 @@ fun PreviewBad() {
         selectedTab = "home",
         onTabSelected = {},
         airQualityValue = 30f,
-        notifications = 2,
         onNotificationsClick = {},
         temperatureRange = remember { mutableStateOf(28f..35f) },
         humidityRange = remember { mutableStateOf(65f..80f) },
@@ -827,7 +824,6 @@ fun PreviewPoor() {
         selectedTab = "home",
         onTabSelected = {},
         airQualityValue = 45f,
-        notifications = 2,
         onNotificationsClick = {},
         temperatureRange = remember { mutableStateOf(28f..35f) },
         humidityRange = remember { mutableStateOf(65f..80f) },
@@ -843,7 +839,6 @@ fun PreviewFair() {
         selectedTab = "home",
         onTabSelected = {},
         airQualityValue = 65f,
-        notifications = 2,
         onNotificationsClick = {},
         temperatureRange = remember { mutableStateOf(28f..35f) },
         humidityRange = remember { mutableStateOf(65f..80f) },
@@ -859,7 +854,6 @@ fun PreviewGood() {
         selectedTab = "home",
         onTabSelected = {},
         airQualityValue = 90f,
-        notifications = 2,
         onNotificationsClick = {},
         temperatureRange = remember { mutableStateOf(28f..35f) },
         humidityRange = remember { mutableStateOf(65f..80f) },
