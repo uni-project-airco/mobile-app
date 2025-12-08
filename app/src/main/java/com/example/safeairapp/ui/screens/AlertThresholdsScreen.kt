@@ -185,6 +185,7 @@ fun AlertThresholdsScreen(
                     pubNubService.publish(channelName, message) { success, error ->
                         if (success) {
                             Log.d("AlertThresholdsScreen", "Thresholds published successfully")
+                            onTabSelected("settings")
                         } else {
                             Log.e("AlertThresholdsScreen", "Failed to publish thresholds: $error")
                         }
