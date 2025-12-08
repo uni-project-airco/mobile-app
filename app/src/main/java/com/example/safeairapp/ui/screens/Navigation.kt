@@ -41,7 +41,11 @@ fun AppNavigation() {
             HomeScreen(
                 selectedTab = "home",
                 onTabSelected = { navController.navigate(it) },
-                onNotificationsClick = { navController.navigate("notifications") }
+                onNotificationsClick = { navController.navigate("notifications") },
+                temperatureRange = temperatureRange,
+                humidityRange = humidityRange,
+                co2Range = co2Range,
+                pm25Range = pm25Range
             )
         }
 

@@ -23,8 +23,10 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -51,7 +53,11 @@ fun HomeScreen(
     onTabSelected: (String) -> Unit,
     airQualityValue: Float = 15f,
     notifications: Int = 2,
-    onNotificationsClick: () -> Unit
+    onNotificationsClick: () -> Unit,
+    temperatureRange: MutableState<ClosedFloatingPointRange<Float>>,
+    humidityRange: MutableState<ClosedFloatingPointRange<Float>>,
+    co2Range: MutableState<ClosedFloatingPointRange<Float>>,
+    pm25Range: MutableState<ClosedFloatingPointRange<Float>>
 ) {
 
 
@@ -61,7 +67,11 @@ fun HomeScreen(
             airQualityValue = airQualityValue,
             notifications = notifications,
             onMoreDetailsClick = { onTabSelected("history") },
-            onNotificationsClick = onNotificationsClick
+            onNotificationsClick = onNotificationsClick,
+            temperatureRange = temperatureRange,
+            humidityRange = humidityRange,
+            co2Range = co2Range,
+            pm25Range = pm25Range
         )
 
         Box(
@@ -82,7 +92,11 @@ fun HomeContent(
     airQualityValue: Float,
     notifications: Int,
     onMoreDetailsClick: () -> Unit,
-    onNotificationsClick: () -> Unit
+    onNotificationsClick: () -> Unit,
+    temperatureRange: MutableState<ClosedFloatingPointRange<Float>>,
+    humidityRange: MutableState<ClosedFloatingPointRange<Float>>,
+    co2Range: MutableState<ClosedFloatingPointRange<Float>>,
+    pm25Range: MutableState<ClosedFloatingPointRange<Float>>
 ) {
     val context = LocalContext.current
     val application = context.applicationContext as SafeAirApplication
@@ -122,7 +136,11 @@ fun HomeContent(
 
                 SensorsList(
                     telemetry = telemetry,
-                    onMoreDetailsClick = onMoreDetailsClick
+                    onMoreDetailsClick = onMoreDetailsClick,
+                    temperatureRange = temperatureRange,
+                    humidityRange = humidityRange,
+                    co2Range = co2Range,
+                    pm25Range = pm25Range
                 )
 
                 Spacer(modifier = Modifier.height(120.dp))
@@ -396,14 +414,17 @@ fun SensorCard(
 @Composable
 fun SensorsList(
     telemetry: TelemetryData?,
-    onMoreDetailsClick: () -> Unit
+    onMoreDetailsClick: () -> Unit,
+    temperatureRange: MutableState<ClosedFloatingPointRange<Float>>,
+    humidityRange: MutableState<ClosedFloatingPointRange<Float>>,
+    co2Range: MutableState<ClosedFloatingPointRange<Float>>,
+    pm25Range: MutableState<ClosedFloatingPointRange<Float>>
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(18.dp)) {
         Spacer(modifier = Modifier.height(10.dp))
 
-        // Temperature
-        val temperature = telemetry?.temperature ?: 22.5
-        val temperatureStatus = getTemperatureStatus(temperature)
+        val temperature = telemetry?.temperature ?: -1.0
+        val temperatureStatus = getTemperatureStatus(temperature, temperatureRange.value)
         SensorCard(
             icon = R.drawable.temperature_card,
             title = "Temperature",
@@ -414,8 +435,8 @@ fun SensorsList(
         )
 
         // Humidity
-        val humidity = telemetry?.humidity ?: 45.0
-        val humidityStatus = getHumidityStatus(humidity)
+        val humidity = telemetry?.humidity ?: -1.0
+        val humidityStatus = getHumidityStatus(humidity, humidityRange.value)
         SensorCard(
             icon = R.drawable.humidity_card,
             title = "Humidity",
@@ -426,8 +447,8 @@ fun SensorsList(
         )
 
         // CO₂ Level
-        val co2Level = telemetry?.co2_level ?: 850.0
-        val co2Status = getCO2Status(co2Level)
+        val co2Level = telemetry?.co2_level ?: -1.0
+        val co2Status = getCO2Status(co2Level, co2Range.value)
         SensorCard(
             icon = R.drawable.co2_card,
             title = "CO₂ Level",
@@ -438,8 +459,8 @@ fun SensorsList(
         )
 
         // Dust (PM2.5)
-        val pm2Level = telemetry?.pm2_level ?: 12.3
-        val pm2Status = getPM2Status(pm2Level)
+        val pm2Level = telemetry?.pm2_level ?: -1.0
+        val pm2Status = getPM2Status(pm2Level, pm25Range.value)
         SensorCard(
             icon = R.drawable.dust_card,
             title = "Dust",
@@ -466,35 +487,46 @@ fun SensorsList(
 
 /**
  * Helper functions to calculate sensor status based on thresholds
+ * Uses the threshold ranges from AlertThresholdsScreen instead of hardcoded values
+ * 
+ * Threshold ranges: start = warning level, endInclusive = danger level
  */
-fun getTemperatureStatus(temperature: Double): String {
+fun getTemperatureStatus(temperature: Double, thresholdRange: ClosedFloatingPointRange<Float>): String {
+    val warning = thresholdRange.start.toDouble()
+    val danger = thresholdRange.endInclusive.toDouble()
     return when {
-        temperature < 10.0 || temperature > 30.0 -> "Bad"
-        temperature < 15.0 || temperature > 27.0 -> "Warning"
+        temperature > danger -> "Bad"
+        temperature > warning -> "Warning"
         else -> "Good"
     }
 }
 
-fun getHumidityStatus(humidity: Double): String {
+fun getHumidityStatus(humidity: Double, thresholdRange: ClosedFloatingPointRange<Float>): String {
+    val warning = thresholdRange.start.toDouble()
+    val danger = thresholdRange.endInclusive.toDouble()
     return when {
-        humidity < 30.0 || humidity > 60.0 -> "Bad"
-        humidity < 40.0 || humidity > 50.0 -> "Warning"
+        humidity > danger -> "Bad"
+        humidity > warning -> "Warning"
         else -> "Good"
     }
 }
 
-fun getCO2Status(co2Level: Double): String {
+fun getCO2Status(co2Level: Double, thresholdRange: ClosedFloatingPointRange<Float>): String {
+    val warning = thresholdRange.start.toDouble()
+    val danger = thresholdRange.endInclusive.toDouble()
     return when {
-        co2Level > 1000.0 -> "Bad"
-        co2Level > 800.0 -> "Warning"
+        co2Level > danger -> "Bad"
+        co2Level > warning -> "Warning"
         else -> "Good"
     }
 }
 
-fun getPM2Status(pm2Level: Double): String {
+fun getPM2Status(pm2Level: Double, thresholdRange: ClosedFloatingPointRange<Float>): String {
+    val warning = thresholdRange.start.toDouble()
+    val danger = thresholdRange.endInclusive.toDouble()
     return when {
-        pm2Level > 35.0 -> "Bad"
-        pm2Level > 25.0 -> "Warning"
+        pm2Level > danger -> "Bad"
+        pm2Level > warning -> "Warning"
         else -> "Good"
     }
 }
@@ -764,7 +796,11 @@ fun PreviewVeryBad() {
         onTabSelected = {},
         airQualityValue = 10f,
         notifications = 2,
-        onNotificationsClick = {}
+        onNotificationsClick = {},
+        temperatureRange = remember { mutableStateOf(28f..35f) },
+        humidityRange = remember { mutableStateOf(65f..80f) },
+        co2Range = remember { mutableStateOf(800f..1100f) },
+        pm25Range = remember { mutableStateOf(35f..55f) }
     )
 }
 
@@ -776,7 +812,11 @@ fun PreviewBad() {
         onTabSelected = {},
         airQualityValue = 30f,
         notifications = 2,
-        onNotificationsClick = {}
+        onNotificationsClick = {},
+        temperatureRange = remember { mutableStateOf(28f..35f) },
+        humidityRange = remember { mutableStateOf(65f..80f) },
+        co2Range = remember { mutableStateOf(800f..1100f) },
+        pm25Range = remember { mutableStateOf(35f..55f) }
     )
 }
 
@@ -788,7 +828,11 @@ fun PreviewPoor() {
         onTabSelected = {},
         airQualityValue = 45f,
         notifications = 2,
-        onNotificationsClick = {}
+        onNotificationsClick = {},
+        temperatureRange = remember { mutableStateOf(28f..35f) },
+        humidityRange = remember { mutableStateOf(65f..80f) },
+        co2Range = remember { mutableStateOf(800f..1100f) },
+        pm25Range = remember { mutableStateOf(35f..55f) }
     )
 }
 
@@ -800,7 +844,11 @@ fun PreviewFair() {
         onTabSelected = {},
         airQualityValue = 65f,
         notifications = 2,
-        onNotificationsClick = {}
+        onNotificationsClick = {},
+        temperatureRange = remember { mutableStateOf(28f..35f) },
+        humidityRange = remember { mutableStateOf(65f..80f) },
+        co2Range = remember { mutableStateOf(800f..1100f) },
+        pm25Range = remember { mutableStateOf(35f..55f) }
     )
 }
 
@@ -812,6 +860,10 @@ fun PreviewGood() {
         onTabSelected = {},
         airQualityValue = 90f,
         notifications = 2,
-        onNotificationsClick = {}
+        onNotificationsClick = {},
+        temperatureRange = remember { mutableStateOf(28f..35f) },
+        humidityRange = remember { mutableStateOf(65f..80f) },
+        co2Range = remember { mutableStateOf(800f..1100f) },
+        pm25Range = remember { mutableStateOf(35f..55f) }
     )
 }
