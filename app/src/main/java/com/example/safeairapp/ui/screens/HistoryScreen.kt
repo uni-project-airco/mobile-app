@@ -39,28 +39,6 @@ data class Stats(
     val current: Float
 )
 
-var daysTelemetry: List<HistoricalData> ?= null
-var weekTelemetry: List<HistoricalData> ?= null
-
-suspend fun fetchTelemetry() {
-    try {
-        val response = ApiClient.apiServices.getHistoricalData()
-
-        if (response.code() == 200 && response.body() != null){
-            daysTelemetry = response.body()?.day
-            weekTelemetry = response.body()?.week
-        }
-        else {
-            Log.d("fetchTelemetry", response.code().toString() + ": " + response.message())
-        }
-    } catch (e: Exception) {
-        Log.d(
-            "fetchTelemetry Exception Caught:",
-            "Network error: ${e.message ?: "Unable to connect to server"}"
-        )
-    }
-}
-
 @Composable
 fun HistoryScreen(
     notifications: Int = 2,
@@ -72,8 +50,30 @@ fun HistoryScreen(
     var filterExpanded by remember { mutableStateOf(false) }
     var selectedFilter by remember { mutableStateOf("Last 24h") }
 
+    var daysTelemetry by remember { mutableStateOf<List<HistoricalData>?>(null) }
+    var weekTelemetry by remember { mutableStateOf<List<HistoricalData>?>(null) }
+    var isLoading by remember { mutableStateOf(false) }
+
     LaunchedEffect(selectedFilter) {
-        fetchTelemetry()
+        isLoading = true
+        try {
+            val response = ApiClient.apiServices.getHistoricalData()
+
+            if (response.code() == 200 && response.body() != null) {
+                daysTelemetry = response.body()?.day
+                weekTelemetry = response.body()?.week
+                Log.d("HistoryScreen", "Fetched ${daysTelemetry?.size} day records and ${weekTelemetry?.size} week records")
+            } else {
+                Log.d("fetchTelemetry", response.code().toString() + ": " + response.message())
+            }
+        } catch (e: Exception) {
+            Log.e(
+                "fetchTelemetry Exception Caught:",
+                "Network error: ${e.message ?: "Unable to connect to server"}", e
+            )
+        } finally {
+            isLoading = false
+        }
     }
 
     Box(modifier = Modifier.fillMaxSize()) {
@@ -132,7 +132,7 @@ fun HistoryScreen(
                         },
                         fontFamily = Montserrat,
                         fontWeight = FontWeight.Bold,
-                        fontSize = 22.sp
+                        fontSize = 20.sp
                     )
                 }
 
@@ -164,11 +164,11 @@ fun HistoryScreen(
 
             Spacer(modifier = Modifier.height(30.dp))
 
-            HistoryChart(selectedCategory, selectedFilter)
+            HistoryChart(selectedCategory, selectedFilter, daysTelemetry, weekTelemetry)
 
             Spacer(modifier = Modifier.height(45.dp))
 
-            StatsGrid(selectedCategory, selectedFilter)
+            StatsGrid(selectedCategory, selectedFilter, daysTelemetry, weekTelemetry)
 
             Spacer(modifier = Modifier.height(135.dp))
         }
@@ -260,8 +260,13 @@ fun StatCard(label: String, value: Float, unit: String, modifier: Modifier = Mod
 
 
 @Composable
-fun StatsGrid(category: String, range: String) {
-    val data = getChartData(category, range)
+fun StatsGrid(
+    category: String, 
+    range: String,
+    daysTelemetry: List<HistoricalData>?,
+    weekTelemetry: List<HistoricalData>?
+) {
+    val data = getChartData(category, range, daysTelemetry, weekTelemetry)
     val stats = getStats(data)
 
     val unit = when (category) {
@@ -335,17 +340,17 @@ fun CategorySwitcher(
 
 fun getValue(category: String, item: HistoricalData): Float {
     return when (category) {
-        "Temp" -> item.avg_temperature?.toFloat() as Float
-        "Humidity" -> item.avg_humidity?.toFloat() as Float
-        "CO₂" -> item.avg_co2?.toFloat() as Float
-        else -> item.avg_pm25?.toFloat() as Float
+        "Temp" -> item.avg_temperature?.toFloat() ?: 0f
+        "Humidity" -> item.avg_humidity?.toFloat() ?: 0f
+        "CO₂" -> item.avg_co2?.toFloat() ?: 0f
+        else -> item.avg_pm25?.toFloat() ?: 0f
     }
 }
 
-fun getChartData(category: String, range: String): List<Float> {
+fun getChartData(category: String, range: String, daysData: List<HistoricalData>?, weekData: List<HistoricalData>?): List<Float> {
     val source = when (range) {
-        "Last 24h" -> daysTelemetry
-        "7 days" -> weekTelemetry
+        "Last 24h" -> daysData
+        "7 days" -> weekData
         else -> null
     } ?: return emptyList()
 
@@ -353,23 +358,34 @@ fun getChartData(category: String, range: String): List<Float> {
 }
 
 fun getHour(time: String?): String? {
-    return time?.split(":")[0]
+    return try {
+        time?.split("T")?.getOrNull(1)?.split(":")?.getOrNull(0)?.let { "$it:00" }
+    } catch (e: Exception) {
+        null
+    }
 }
 
-fun getTimeRanges(): List<String> {
-    return daysTelemetry?.map { it -> getHour(it.updated_at?.split("T")[1])+ ":00" } ?: emptyList()
+fun getTimeRanges(daysData: List<HistoricalData>?): List<String> {
+    return daysData?.mapNotNull { getHour(it.updated_at) } ?: emptyList()
 }
 
 @Composable
-fun HistoryChart(category: String, range: String) {
-
-    val data = getChartData(category, range)
-    val entries = data.mapIndexed { index, value -> entryOf(index, value) }
-    val modelProducer = ChartEntryModelProducer(entries)
+fun HistoryChart(
+    category: String, 
+    range: String,
+    daysTelemetry: List<HistoricalData>?,
+    weekTelemetry: List<HistoricalData>?
+) {
+    val data = getChartData(category, range, daysTelemetry, weekTelemetry)
+    val entries = remember(data) { data.mapIndexed { index, value -> entryOf(index, value) } }
+    val modelProducer = remember(entries) { ChartEntryModelProducer(entries) }
 
     val bottomLabels = when (range) {
-        "Last 24h" -> getTimeRanges()
-        "7 days" -> listOf("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun")
+        "Last 24h" -> getTimeRanges(daysTelemetry)
+        "7 days" -> {
+            val days = listOf("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun")
+            weekTelemetry?.indices?.map { days[it % days.size] } ?: emptyList()
+        }
         else -> listOf("1w", "2w", "3w", "4w")
     }
 
@@ -380,16 +396,33 @@ fun HistoryChart(category: String, range: String) {
         }
     )
 
-    Chart(
-        chart = lineChart(),
-        chartModelProducer = modelProducer,
-        startAxis = rememberStartAxis(),
-        bottomAxis = bottomAxis,
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(250.dp)
-            .padding(horizontal = 24.dp)
-    )
+    if (data.isNotEmpty()) {
+        Chart(
+            chart = lineChart(),
+            chartModelProducer = modelProducer,
+            startAxis = rememberStartAxis(),
+            bottomAxis = bottomAxis,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(250.dp)
+                .padding(horizontal = 24.dp)
+        )
+    } else {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(250.dp)
+                .padding(horizontal = 24.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = if (range == "1 month") "No data available" else "Loading...",
+                fontFamily = Montserrat,
+                fontSize = 16.sp,
+                color = Color.Gray
+            )
+        }
+    }
 }
 
 
