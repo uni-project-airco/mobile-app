@@ -1,19 +1,24 @@
 package com.example.safeairapp.utils
 
 import android.content.Context
-import android.content.SharedPreferences
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.stringPreferencesKey
+import androidx.datastore.preferences.preferencesDataStore
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
+
+private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "SafeAirPrefs")
 
 class TokenManager private constructor(context: Context) {
-    private val prefs: SharedPreferences = context.getSharedPreferences(
-        PREFS_NAME,
-        Context.MODE_PRIVATE
-    )
+    private val dataStore = context.dataStore
 
     companion object {
-        private const val PREFS_NAME = "SafeAirPrefs"
-        private const val KEY_ACCESS_TOKEN = "access_token"
-        private const val KEY_REFRESH_TOKEN = "refresh_token"
-        private const val KEY_SENSOR_TOKEN = "sensor_token"
+        private val KEY_ACCESS_TOKEN = stringPreferencesKey("access_token")
+        private val KEY_REFRESH_TOKEN = stringPreferencesKey("refresh_token")
+        private val KEY_SENSOR_TOKEN = stringPreferencesKey("sensor_token")
 
         @Volatile
         private var INSTANCE: TokenManager? = null
@@ -25,33 +30,44 @@ class TokenManager private constructor(context: Context) {
         }
     }
 
-    fun saveTokens(accessToken: String?, refreshToken: String?, sensorToken: String?) {
-        prefs.edit().apply {
-            accessToken?.let { putString(KEY_ACCESS_TOKEN, it) }
-            refreshToken?.let { putString(KEY_REFRESH_TOKEN, it) }
-            sensorToken?.let { putString(KEY_SENSOR_TOKEN, it) }
-            apply()
+    suspend fun saveTokens(accessToken: String?, refreshToken: String?, sensorToken: String?) {
+        dataStore.edit { preferences ->
+            accessToken?.let { preferences[KEY_ACCESS_TOKEN] = it }
+            refreshToken?.let { preferences[KEY_REFRESH_TOKEN] = it }
+            sensorToken?.let { preferences[KEY_SENSOR_TOKEN] = it }
         }
     }
 
-    fun getAccessToken(): String? = prefs.getString(KEY_ACCESS_TOKEN, null)
+    val accessToken: Flow<String?> = dataStore.data.map { preferences ->
+        preferences[KEY_ACCESS_TOKEN]
+    }
 
-    fun getRefreshToken(): String? = prefs.getString(KEY_REFRESH_TOKEN, null)
+    val refreshToken: Flow<String?> = dataStore.data.map { preferences ->
+        preferences[KEY_REFRESH_TOKEN]
+    }
 
-    fun getSensorToken(): String? = prefs.getString(KEY_SENSOR_TOKEN, null)
+    val sensorToken: Flow<String?> = dataStore.data.map { preferences ->
+        preferences[KEY_SENSOR_TOKEN]
+    }
 
-    fun clearTokens() {
-        prefs.edit().apply {
-            remove(KEY_ACCESS_TOKEN)
-            remove(KEY_REFRESH_TOKEN)
-            remove(KEY_SENSOR_TOKEN)
-            apply()
+    suspend fun getAccessToken(): String? = accessToken.first()
+    
+    suspend fun getRefreshToken(): String? = refreshToken.first()
+    
+    suspend fun getSensorToken(): String? = sensorToken.first()
+
+    suspend fun clearTokens() {
+        dataStore.edit { preferences ->
+            preferences.remove(KEY_ACCESS_TOKEN)
+            preferences.remove(KEY_REFRESH_TOKEN)
+            preferences.remove(KEY_SENSOR_TOKEN)
         }
     }
 
-    fun hasTokens(): Boolean {
-        return getAccessToken() != null && getSensorToken() != null
+    suspend fun hasTokens(): Boolean {
+        val accessToken = getAccessToken()
+        val sensorToken = getSensorToken()
+        return accessToken != null && sensorToken != null
     }
 }
-
 

@@ -3,6 +3,7 @@ package com.example.safeairapp.ui.screens
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -181,21 +182,38 @@ fun NotificationsScreen(
 
                 item {
                     Spacer(modifier = Modifier.height(20.dp))
-                    Text(
-                        text = "Mark all as read",
-                        fontSize = 14.sp,
-                        fontFamily = Montserrat,
-                        color = Color.Black,
-                        fontWeight = FontWeight.Bold,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(top = 10.dp, bottom = 14.dp, end = 10.dp),
-                        textAlign = TextAlign.End
-                    )
+                    if (allNotifications.any { it.isNew }) {
+                        Text(
+                            text = "Mark all as read",
+                            fontSize = 14.sp,
+                            fontFamily = Montserrat,
+                            color = Color.Black,
+                            fontWeight = FontWeight.Bold,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable {
+                                    // Mark all notifications as read
+                                    allNotifications = allNotifications.map { notification ->
+                                        notification.copy(isNew = false)
+                                    }.toMutableList()
+                                }
+                                .padding(top = 10.dp, bottom = 14.dp, end = 10.dp),
+                            textAlign = TextAlign.End
+                        )
+                    }
                 }
 
-                items(allNotifications) { item ->
-                    NotificationCard(item)
+                items(
+                    items = allNotifications,
+                    key = { it.id }
+                ) { item ->
+                    NotificationCard(
+                        item = item,
+                        onDelete = {
+                            // Remove the notification from the list
+                            allNotifications = allNotifications.filter { it.id != item.id }.toMutableList()
+                        }
+                    )
                     Spacer(modifier = Modifier.height(18.dp))
                 }
             }
@@ -286,7 +304,10 @@ fun NotificationsHeader(newCount: Int = 2) {
 }
 
 @Composable
-fun NotificationCard(item: NotificationItem) {
+fun NotificationCard(
+    item: NotificationItem,
+    onDelete: () -> Unit = {}
+) {
 
     Box(
         modifier = Modifier
@@ -377,7 +398,9 @@ fun NotificationCard(item: NotificationItem) {
                 Image(
                     painter = painterResource(id = R.drawable.delete),
                     contentDescription = "delete",
-                    modifier = Modifier.size(18.dp)
+                    modifier = Modifier
+                        .size(18.dp)
+                        .clickable { onDelete() }
                 )
             }
         }
