@@ -18,18 +18,28 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.safeairapp.R
+import com.example.safeairapp.SafeAirApplication
 import com.example.safeairapp.ui.theme.Montserrat
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.ui.platform.LocalContext
 
 @Composable
 fun SettingsScreen(
     selectedTab: String = "settings",
-    notifications: Int = 2,
     onTabSelected: (String) -> Unit,
     onNotificationsClick: () -> Unit,
     onOpenThresholds: () -> Unit
 ) {
+    val context = LocalContext.current
+    val application = context.applicationContext as SafeAirApplication
+    val pubNubService = remember { application.pubNubService }
+
+    val notificationsList by pubNubService.notifications.collectAsState()
+    val notificationCount = notificationsList.size
 
     Box(modifier = Modifier.fillMaxSize()) {
 
@@ -41,7 +51,7 @@ fun SettingsScreen(
         ) {
 
             SettingsHeader(
-                notifications = notifications,
+                notifications = notificationCount,
                 onNotificationsClick = onNotificationsClick
             )
 
@@ -302,7 +312,6 @@ fun SettingsHeader(
 fun PreviewSettingsScreen() {
     SettingsScreen(
         selectedTab = "settings",
-        notifications = 3,
         onTabSelected = {},
         onNotificationsClick = {},
         onOpenThresholds = {}

@@ -21,7 +21,12 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.safeairapp.R
+import com.example.safeairapp.SafeAirApplication
 import com.example.safeairapp.ui.theme.Montserrat
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.ui.platform.LocalContext
 import com.patrykandpatrick.vico.compose.axis.horizontal.rememberBottomAxis
 import com.patrykandpatrick.vico.compose.axis.vertical.rememberStartAxis
 import com.patrykandpatrick.vico.compose.chart.Chart
@@ -41,11 +46,17 @@ data class Stats(
 
 @Composable
 fun HistoryScreen(
-    notifications: Int = 2,
     selectedTab: String = "history",
     onTabSelected: (String) -> Unit,
     onNotificationsClick: () -> Unit
 ) {
+    val context = LocalContext.current
+    val application = context.applicationContext as SafeAirApplication
+    val pubNubService = remember { application.pubNubService }
+
+    val notificationsList by pubNubService.notifications.collectAsState()
+    val notificationCount = notificationsList.size
+
     var selectedCategory by remember { mutableStateOf("Temp") }
     var filterExpanded by remember { mutableStateOf(false) }
     var selectedFilter by remember { mutableStateOf("Last 24h") }
@@ -86,7 +97,7 @@ fun HistoryScreen(
         ) {
 
             HistoryHeader(
-                notifications = notifications,
+                notifications = notificationCount,
                 onNotificationsClick = onNotificationsClick
             )
 
@@ -359,7 +370,7 @@ fun getChartData(category: String, range: String, daysData: List<HistoricalData>
 
 fun getHour(time: String?): String? {
     return try {
-        time?.split("T")?.getOrNull(1)?.split(":")?.getOrNull(0)?.let { "$it:00" }
+        time?.split("T")?.getOrNull(1)?.split(":")?.getOrNull(0)
     } catch (e: Exception) {
         null
     }
@@ -529,7 +540,6 @@ fun HistoryHeader(notifications: Int, onNotificationsClick: () -> Unit) {
 @Composable
 fun PreviewHistoryScreen() {
     HistoryScreen(
-        notifications = 2,
         selectedTab = "history",
         onTabSelected = {},
         onNotificationsClick = {}

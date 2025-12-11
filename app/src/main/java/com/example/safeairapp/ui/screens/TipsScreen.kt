@@ -99,7 +99,6 @@ private fun generateRecommendation(data: PubNubService.NotificationData): Recomm
 fun TipsScreen(
     selectedTab: String,
     onTabSelected: (String) -> Unit,
-    notifications: Int = 2,
     onNotificationsClick: () -> Unit,
     activeList: MutableList<Recommendation>,
     completedList: MutableList<Recommendation>,
@@ -114,6 +113,7 @@ fun TipsScreen(
 
     // Collect PubNub notifications
     val pubNubRecommendations by pubNubService.notifications.collectAsState()
+    val notificationCount = pubNubRecommendations.size
 //    var processedRecommendationKeys by remember {
 //        mutableStateOf<Set<String>>(emptySet())
 //    }
@@ -146,7 +146,7 @@ fun TipsScreen(
         ) {
 
             TipsHeader(
-                notifications = notifications,
+                notifications = notificationCount,
                 onNotificationsClick = onNotificationsClick
             )
 
@@ -573,7 +573,6 @@ fun PreviewTipsScreen() {
     TipsScreen(
         selectedTab = "tips",
         onTabSelected = {},
-        notifications = 2,
         onNotificationsClick = {} ,
         activeList = mutableListOf(),
         completedList = mutableListOf(),

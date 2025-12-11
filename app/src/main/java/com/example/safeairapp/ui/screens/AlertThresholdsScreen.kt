@@ -33,11 +33,12 @@ import com.example.safeairapp.SafeAirApplication
 import com.example.safeairapp.ui.theme.Montserrat
 import android.util.Log
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 
 @Composable
 fun AlertThresholdsScreen(
     selectedTab: String = "settings",
-    notifications: Int = 2,
     onTabSelected: (String) -> Unit,
     onNotificationsClick: () -> Unit,
     temperatureRange: MutableState<ClosedFloatingPointRange<Float>>,
@@ -48,6 +49,9 @@ fun AlertThresholdsScreen(
     val context = LocalContext.current
     val application = context.applicationContext as SafeAirApplication
     val pubNubService = remember { application.pubNubService }
+
+    val notificationsList by pubNubService.notifications.collectAsState()
+    val notificationCount = notificationsList.size
     
     // Track threshold values for each sensor
 //    var temperatureRange by remember { mutableStateOf(28f..35f) }
@@ -66,7 +70,7 @@ fun AlertThresholdsScreen(
         ) {
 
             AlertThresholdsHeader(
-                notifications = notifications,
+                notifications = notificationCount,
                 onNotificationsClick = onNotificationsClick,
                 onBackClick = { onTabSelected("settings") }
             )
@@ -767,7 +771,6 @@ fun AlertThresholdsHeader(
 fun PreviewAlertThresholdsScreen() {
     AlertThresholdsScreen(
         selectedTab = "settings",
-        notifications = 3,
         onTabSelected = {},
         onNotificationsClick = {},
         temperatureRange = remember { mutableStateOf(28f..35f) },

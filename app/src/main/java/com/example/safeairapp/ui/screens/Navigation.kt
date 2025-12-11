@@ -86,6 +86,7 @@ fun AppNavigation() {
 
         composable("thresholds") {
             AlertThresholdsScreen(
+                selectedTab = "settings",
                 onTabSelected = { navController.navigate(it) },
                 onNotificationsClick = { navController.navigate("notifications") },
                 temperatureRange = temperatureRange,
