@@ -1,7 +1,10 @@
 package com.example.safeairapp.services
 
+import android.content.Context
 import android.util.Log
+import com.example.safeairapp.SafeAirApplication
 import com.example.safeairapp.api.TelemetryData
+import com.example.safeairapp.utils.NotificationHelper
 import com.pubnub.api.PubNub
 import com.pubnub.api.UserId
 import com.pubnub.api.v2.PNConfiguration
@@ -19,6 +22,7 @@ class PubNubService {
 
     private var isInitialized = false
     private var currentChannelName: String? = null
+    private var context: Context? = null
 
     private val TAG = "PubNubService"
 
@@ -38,6 +42,15 @@ class PubNubService {
         currentList.add(0, notificationData)
         _notifications.value = currentList
         Log.d(TAG, "New notification created: ${notificationData.title}")
+        
+        context?.let { ctx ->
+            NotificationHelper.showNotification(
+                context = ctx,
+                title = notificationData.title,
+                message = notificationData.message,
+                status = notificationData.status
+            )
+        }
     }
 
     /**
@@ -53,10 +66,13 @@ class PubNubService {
         subscribeKey: String,
         channelName: String,
         authToken: String,
-        userId: String = "android-user"
+        userId: String = "android-user",
+        context: Context? = null
     ) {
 
         Log.d(TAG, "INIT START")
+        
+        this.context = context
 
         if (isInitialized && pubnub != null) {
             Log.d(TAG, "PubNubService already initialized, skipping...")
@@ -65,6 +81,8 @@ class PubNubService {
 
         try {
             disconnect()
+            
+            context?.let { NotificationHelper.createNotificationChannel(it) }
 
             val config = PNConfiguration.builder(UserId(userId), subscribeKey) {
                 this.publishKey = publishKey
@@ -106,6 +124,7 @@ class PubNubService {
         pubnub?.destroy()
         pubnub = null
         currentChannelName = null
+        context = null
         isInitialized = false
         Log.d(TAG, "PubNub disconnected")
     }

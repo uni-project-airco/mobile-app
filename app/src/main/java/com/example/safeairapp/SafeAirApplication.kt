@@ -23,6 +23,8 @@ class SafeAirApplication : Application() {
         super.onCreate()
         instance = this
 
+        com.example.safeairapp.utils.NotificationHelper.createNotificationChannel(this)
+
         initializePubNub()
     }
 
@@ -42,7 +44,8 @@ class SafeAirApplication : Application() {
                     subscribeKey = "sub-c-2cfb801c-715b-494b-b401-12764cf0ecfa",
                     channelName = "sensor_0271a7bf-b4d6-4f74-95d9-4b83f80d2808_5eb81cf8-d129-11f0-86d2-4a0ab95da33d",
                     authToken = sensorToken,
-                    userId = "android-user"
+                    userId = "android-user",
+                    context = this@SafeAirApplication
                 )
                 Log.d("SafeAirApplication", "PubNubService initialized successfully with sensor token from DataStore")
             }
