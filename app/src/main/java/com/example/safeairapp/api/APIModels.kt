@@ -1,5 +1,7 @@
 package com.example.safeairapp.api
 
+import com.google.gson.annotations.SerializedName
+
 data class LoginRequest(
     val username: String,
     val password: String
@@ -22,5 +24,8 @@ data class RegisterRequest(
     val username: String,
     val email: String,
     val password: String,
-    val confirm_password: String
+    @SerializedName("confirm_password")
+    val confirmPassword: String,
+    @SerializedName("system_id")
+    val systemId: String
 )
