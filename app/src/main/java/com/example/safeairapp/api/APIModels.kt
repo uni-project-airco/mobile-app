@@ -5,6 +5,7 @@ data class LoginRequest(
     val password: String
 )
 
+// reuse as RegisterResponse
 data class LoginResponse(
     val msg: String? = null,
     val access_token: String? = null,
@@ -15,4 +16,10 @@ data class LoginResponse(
 data class HistoryResponse(
     val day: List<HistoricalData> ?= null,
     val week: List<HistoricalData> ?= null
+)
+
+data class RegisterRequest(
+    val username: String,
+    val email: String,
+    val password: String
 )
