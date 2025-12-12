@@ -11,5 +11,9 @@ interface ApiServices {
 
     @GET("telemetry/get_historical")
     suspend fun getHistoricalData(): Response<HistoryResponse>
+
+    @POST("auth/register")
+    suspend fun registerUser(@Body user: RegisterRequest): LoginResponse
+
 }
 

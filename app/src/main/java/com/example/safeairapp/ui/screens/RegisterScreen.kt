@@ -1,5 +1,6 @@
 package com.example.safeairapp.ui.screens
 
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -15,6 +16,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -23,12 +25,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
@@ -40,10 +44,18 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.safeairapp.R
-
+import com.example.safeairapp.api.ApiClient
+import com.example.safeairapp.api.RegisterRequest
+import kotlinx.coroutines.launch
+import retrofit2.HttpException
 @Composable
 fun RegisterScreen(modifier: Modifier= Modifier, onLoginClick: () -> Unit = {},
                    onSignUpComplete: () -> Unit = {}){
+
+    val coroutineScope = rememberCoroutineScope()
+    val context = LocalContext.current
+    var isLoading by remember { mutableStateOf(false) }
+
     var fullName by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
@@ -315,22 +327,56 @@ fun RegisterScreen(modifier: Modifier= Modifier, onLoginClick: () -> Unit = {},
                         confirmPasswordError = "Passwords do not match"
                         valid = false
                     }
+                    if (valid) {
 
-                    if (valid) onSignUpComplete()
+                        coroutineScope.launch {
+                            isLoading = true
+                            try {
+
+                                val response = ApiClient.apiServices.registerUser(
+                                    RegisterRequest(
+                                        username = fullName,
+                                        email = email,
+                                        password = password,
+                                        confirmPassword = confirmPassword,
+                                        systemId = "0271a7bf-b4d6-4f74-95d9-4b83f80d2808"
+                                    )
+                                )
+                                Toast.makeText(context, "Registration successful! Please log in.", Toast.LENGTH_LONG).show()
+                                onLoginClick()
+                            } catch (e: HttpException) {
+                                val error = e.response()?.errorBody()?.string() ?: "Unknown error"
+                                Toast.makeText(context, "Registration failed: $error", Toast.LENGTH_LONG).show()
+                            }  catch (e: Exception) {
+                                Toast.makeText(context, "An unexpected error occurred: ${e.message}", Toast.LENGTH_LONG).show()
+                            } finally {
+                                isLoading = false
+                            }
+                        }
+                    }
                 },
                 colors = ButtonDefaults.buttonColors(containerColor = Color.Black),
                 shape = RoundedCornerShape(50),
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(55.dp)
+                    .height(55.dp),
+                enabled = !isLoading
             ) {
-                Text(
-                    text = "Sign up",
-                    color = Color.White,
-                    fontFamily = montserrat,
-                    fontWeight = FontWeight.SemiBold,
-                    fontSize = 22.sp
-                )
+                if (isLoading) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(24.dp),
+                        color = Color.White
+                    )
+                } else {
+                    Text(
+                        text = "Sign up",
+                        color = Color.White,
+                        fontFamily = montserrat,
+                        fontWeight = FontWeight.SemiBold,
+                        fontSize = 22.sp
+                    )
+                }
+
             }
 
             Spacer(modifier = Modifier.height(64.dp))
