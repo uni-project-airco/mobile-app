@@ -337,7 +337,9 @@ fun RegisterScreen(modifier: Modifier= Modifier, onLoginClick: () -> Unit = {},
                                     RegisterRequest(
                                         username = fullName,
                                         email = email,
-                                        password = password
+                                        password = password,
+                                        confirm_password = confirmPassword
+
                                     )
                                 )
                                 Toast.makeText(context, "Registration successful! Please log in.", Toast.LENGTH_LONG).show()
